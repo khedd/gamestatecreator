@@ -1,4 +1,4 @@
-import java.util.ArrayList;
+import java.util.*;
 
 /**
  * Main entry pint of project GameStateCreator
@@ -28,4 +28,16 @@ public class Main {
         userActions.add(userAction);
         return userActions;
     }
+    static EscapeScenarioCondition createConditions(){
+        String name = "START GAME";
+        String level = "MENU";
+        EscapeGameAction.Option escapeGameAction = EscapeGameAction.Option.START;
+        ArrayList<String> pickedItems = new ArrayList<>();
+        HashMap<String, EscapeScenarioCondition.Option> items = new HashMap<>();
+        EscapeScenarioCondition escapeScenarioCondition = new EscapeScenarioCondition(name, level, escapeGameAction,
+                pickedItems, items);
+
+        return escapeScenarioCondition;
+    }
+
 }
