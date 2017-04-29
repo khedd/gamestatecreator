@@ -14,15 +14,10 @@ public class Main {
      */
     public static void main(String[] args){
         System.out.println("Game State Creator");
-        ArrayList<UserAction> userActions = createActions();
+        createTestAdvanced ();
 
-        GameState menuState = GameState.fromMenu();
-        GameGraph gameGraph = new GameGraph(menuState);
-        gameGraph.setUserActions ( userActions);
-        gameGraph.generate();
-        gameGraph.print();
     }
-    public static ArrayList<UserAction> createActions (){
+    static ArrayList<UserAction> createActions (){
         UserAction userAction = new UserAction("START", "MENU", "ROOM");
         ArrayList<UserAction> userActions= new ArrayList<>();
         userActions.add(userAction);
@@ -40,4 +35,9 @@ public class Main {
         return escapeScenarioCondition;
     }
 
+    static void createTestAdvanced (){
+
+        GameState menuState = GameState.fromMenu();
+        GameGraph gameGraph = new GameGraph(menuState);
+    }
 }

@@ -1,25 +1,28 @@
 /**
- * Denotes the actions in the game
+ * Denotes the actions in the game, each action requires certain pre state in the game
+ * and every action causes a state change in the game state.
+ * {@link EscapeScenarioCondition} class is used to achieve this.
  */
 class UserAction {
-    private String mPreRoom;
-    private String mPostRoom;
+
+    EscapeScenarioCondition mPreCondition;
+    EscapeScenarioCondition mPostCondition;
     private String mName;
 
-    UserAction (String name, String preRoom, String postRoom){
+    UserAction (String name, EscapeScenarioCondition preCondition, EscapeScenarioCondition postCondition){
         mName = name;
-        mPreRoom = preRoom;
-        mPostRoom = postRoom;
+        mPreCondition = preCondition;
+        mPostCondition = postCondition;
     }
 
-    GameState apply (GameState gameState){
-        if ( gameState.mCurrentRoom.equals(mPreRoom)){
-            GameState gameStateNew = new GameState ( gameState);
-            gameStateNew.mCurrentRoom = mPostRoom;
-
-
-            return gameStateNew;
-        }else
-            return null;
-    }
+//    GameState apply (GameState gameState){
+//        if ( gameState.mCurrentRoom.equals(mPreRoom)){
+//            GameState gameStateNew = new GameState ( gameState);
+//            gameStateNew.mCurrentRoom = mPostRoom;
+//
+//
+//            return gameStateNew;
+//        }else
+//            return null;
+//    }
 }

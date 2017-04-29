@@ -1,37 +1,69 @@
 import java.util.ArrayList;
 
 /**
+ * State of the Game
  * Game state class that holds the:
  *  - Current Room
  *  - Current Selection
  *  - Current Items
  *  - Picked Items
+ *
+ *TODO compare game states
+ *TODO gameAction is used null if don't care is selected
  */
 class GameState {
-    String mCurrentRoom;
-    String mSelection;
-    ArrayList<String> mItems;
-    ArrayList<String> mPicked;
+    EscapeScenarioCondition mCurrentCondition;
 
+    /**
+     * Creates a new GameState using the {@link EscapeScenarioCondition}
+     * @param escapeScenarioCondition Current condition of the game
+     */
+    GameState(EscapeScenarioCondition escapeScenarioCondition) {
+        mCurrentCondition = escapeScenarioCondition;
+    }
+
+    /**
+     * Creates a new GameState that starts from the Menu with
+     *  - Level is MENU
+     *  - Nothing is selected
+     *  - Action is PICK
+     *  - No picked items
+     *  - No items
+     * @return GameState that fulfills the above condition
+     */
     static GameState fromMenu(){
-        GameState gameState = new GameState( "MENU", "",
-                new ArrayList<String>(), new ArrayList<String>());
+        GameCondition levelMenu = new GameCondition("MENU", GameCondition.State.TRUE);
+        GameCondition selectedMenu = new GameCondition("", GameCondition.State.TRUE);
+        GameCondition gameAction = new GameCondition(EscapeGameAction.Option.PICK.name(), GameCondition.State.TRUE);
+        ArrayList<GameCondition> pickedItems = new ArrayList<>();
+        ArrayList<GameCondition> items = new ArrayList<>();
+
+        EscapeScenarioCondition escapeScenarioCondition = new EscapeScenarioCondition(
+                levelMenu, selectedMenu, gameAction, pickedItems, items);
+        GameState gameState = new GameState( escapeScenarioCondition);
         return gameState;
     }
 
+    /**
+     * Copy constructor, uses {@link EscapeScenarioCondition} to copy
+     * @param gameState Another game state
+     */
     GameState (GameState gameState){
-        mCurrentRoom = gameState.mCurrentRoom;
-        mSelection   = gameState.mSelection;
-        mItems = new ArrayList<>();
-        mPicked = new ArrayList<>();
-        mItems.addAll(gameState.mItems);
-        mPicked.addAll(gameState.mPicked);
+        mCurrentCondition = new EscapeScenarioCondition(gameState.mCurrentCondition);
     }
 
-    GameState(String currentRoom, String selection, ArrayList<String> items, ArrayList<String> picked) {
-        mCurrentRoom = currentRoom;
-        mSelection = selection;
-        mItems = items;
-        mPicked = picked;
+    /**
+     * Creates a new GameState after applying user action
+     * @param userAction {@link UserAction} checks if {@link UserAction#mPreCondition} holds
+     *                                     and applies {@link UserAction#mPostCondition}
+     * @return null if preCondition is not applicable else a new game state of applies PostCondition
+     */
+    GameState apply ( UserAction userAction){
+        if (mCurrentCondition.compare ( userAction.mPreCondition)){
+            EscapeScenarioCondition newCondition = mCurrentCondition.apply( userAction.mPostCondition);
+            return new GameState( newCondition);
+        }else
+            return null;
     }
+
 }
