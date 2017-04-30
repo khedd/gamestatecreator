@@ -1,3 +1,5 @@
+import java.util.Objects;
+
 /**
  * GameCondition class that holds information such as condition being
  *  - Not important {@link GameCondition.State#DONT_CARE}
@@ -31,12 +33,38 @@ class GameCondition {
         mState = gameCondition.mState;
     }
 
+    /**
+     * if one of the states is don't care return true else the states must be equal else returns false
+     * @param gameCondition Another game condition
+     * @return equality of game condition
+     * TODO add a false check create table for better checking
+     */
     boolean compare (GameCondition gameCondition){
+        if ( mState == State.DONT_CARE || gameCondition.mState == State.DONT_CARE){
+            return true;
+        }else if ( mState == gameCondition.mState && Objects.equals(mName, gameCondition.mName)){
+            return true;
+        }
         return false;
     }
 
-    GameCondition apply(GameCondition mSelected) {
-        return null;
+    /**
+     * Applies the game state to the new game state
+     * @param gameCondition
+     * @return
+     */
+    GameCondition apply(GameCondition gameCondition) {
+        if ( gameCondition.mState == State.DONT_CARE){
+            return new GameCondition(this);
+        }else{
+            return new GameCondition(gameCondition);
+        }
+
+    }
+
+    @Override
+    public String toString() {
+        return mName + " " + mState.name();
     }
 
     enum State {

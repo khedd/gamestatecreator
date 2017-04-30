@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * Scenario conditions that exists in Escape Games. Used to determine the
@@ -46,16 +47,6 @@ class EscapeScenarioCondition extends ScenarioCondition{
     }
 
     /**
-     * Applies this condition to the gameState thus changing the game state creates a new state
-     * @param gameState Current {@link GameState}
-     * @return new {@link GameState} that is created after applying this game state
-     */
-    GameState apply ( GameState gameState){
-
-        return  null;
-    }
-
-    /**
      * Compares this condition to other condition
      * @param mPreCondition Pre condition to be compared
      * @return if mPreCondition is subset of current condition returns true else false
@@ -65,6 +56,22 @@ class EscapeScenarioCondition extends ScenarioCondition{
         status =  mGameAction.compare(mPreCondition.mGameAction);
         status &= mLevel.compare( mPreCondition.mLevel);
         status &= mSelected.compare( mPreCondition.mSelected);
+        //todo bad loops
+        for (GameCondition mFItem: mItems) {
+            for (GameCondition mSItem: mPreCondition.mItems) {
+                if (Objects.equals(mFItem.mName, mSItem.mName)){
+                    status &= mFItem.compare( mSItem);
+                }
+            }
+        }
+
+        for (GameCondition mFItem: mPickedItems) {
+            for (GameCondition mSItem: mPreCondition.mPickedItems) {
+                if (Objects.equals(mFItem.mName, mSItem.mName)){
+                    status &= mFItem.compare( mSItem);
+                }
+            }
+        }
         return status;
     }
 
@@ -77,10 +84,30 @@ class EscapeScenarioCondition extends ScenarioCondition{
         GameCondition selected = mSelected.apply ( mPostCondition.mSelected);
         GameCondition level = mLevel.apply ( mPostCondition.mLevel);
         GameCondition gameAction = mGameAction.apply ( mPostCondition.mGameAction);
+        ArrayList<GameCondition> gamePickedItems = combineLists(mItems, mPostCondition.mItems);
+        ArrayList<GameCondition> gameItems = combineLists(mItems, mPostCondition.mItems);
 
-        //todo apply method for these
-        ArrayList<GameCondition> mPickedItems = new ArrayList<>();
-        ArrayList<GameCondition> mItems = new ArrayList<>();
-        return new EscapeScenarioCondition(level, selected, gameAction, mPickedItems, mItems);
+        return new EscapeScenarioCondition(level, selected, gameAction, gamePickedItems, gameItems);
+    }
+
+    private ArrayList<GameCondition> combineLists(ArrayList<GameCondition> first, ArrayList<GameCondition> second){
+        ArrayList<GameCondition> combined = new ArrayList<>();
+        //first add from first
+        for ( GameCondition gameCondition: first){
+            combined.add( new GameCondition( gameCondition));
+        }
+        for (GameCondition gameConditionSecond: second) {
+            boolean found = false;
+            for (GameCondition gameConditionFirst: combined) {
+                if (Objects.equals(gameConditionFirst.mName, gameConditionSecond.mName)){
+                    gameConditionFirst.apply( gameConditionSecond);
+                    found = true;
+                }
+            }
+            if ( !found){
+                combined.add( gameConditionSecond);
+            }
+        }
+        return combined;
     }
 }
