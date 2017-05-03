@@ -6,11 +6,11 @@ import java.util.Objects;
  */
 class EscapeScenarioCondition extends ScenarioCondition{
 
-    ArrayList<GameCondition> mPickedItems;
-    ArrayList<GameCondition> mItems;
-    GameCondition mSelected;
-    GameCondition mLevel;
-    GameCondition mGameAction;
+    private ArrayList<GameCondition> mPickedItems;
+    private ArrayList<GameCondition> mItems;
+    private final GameCondition mSelected;
+    private final GameCondition mLevel;
+    private final GameCondition mGameAction;
 
     /**
      * Constructor for creating an {@link EscapeScenarioCondition} with all details
@@ -59,7 +59,7 @@ class EscapeScenarioCondition extends ScenarioCondition{
         //todo bad loops
         for (GameCondition mFItem: mItems) {
             for (GameCondition mSItem: mPreCondition.mItems) {
-                if (Objects.equals(mFItem.mName, mSItem.mName)){
+                if (Objects.equals(mFItem.getName(), mSItem.getName())){
                     status &= mFItem.compare( mSItem);
                 }
             }
@@ -67,7 +67,7 @@ class EscapeScenarioCondition extends ScenarioCondition{
 
         for (GameCondition mFItem: mPickedItems) {
             for (GameCondition mSItem: mPreCondition.mPickedItems) {
-                if (Objects.equals(mFItem.mName, mSItem.mName)){
+                if (Objects.equals(mFItem.getName(), mSItem.getName())){
                     status &= mFItem.compare( mSItem);
                 }
             }
@@ -90,6 +90,15 @@ class EscapeScenarioCondition extends ScenarioCondition{
         return new EscapeScenarioCondition(level, selected, gameAction, gamePickedItems, gameItems);
     }
 
+    /**
+     * Combines given two lists of {@link GameCondition}. If only one of the lists contains an element that element
+     * is added else other game condition is added after the result of {@link GameCondition#apply(GameCondition)}
+     * first list is copied to another list and apply method is called on copies
+     * TODO use requires element to disappear so a condition like FALSE will be applied to TRUE however apply does not handle
+     * @param first Our current list
+     * @param second List to be applied to the second list
+     * @return Subset of these two sets
+     */
     private ArrayList<GameCondition> combineLists(ArrayList<GameCondition> first, ArrayList<GameCondition> second){
         ArrayList<GameCondition> combined = new ArrayList<>();
         //first add from first
@@ -99,7 +108,7 @@ class EscapeScenarioCondition extends ScenarioCondition{
         for (GameCondition gameConditionSecond: second) {
             boolean found = false;
             for (GameCondition gameConditionFirst: combined) {
-                if (Objects.equals(gameConditionFirst.mName, gameConditionSecond.mName)){
+                if (Objects.equals(gameConditionFirst.getName(), gameConditionSecond.getName())){
                     gameConditionFirst.apply( gameConditionSecond);
                     found = true;
                 }
@@ -109,5 +118,21 @@ class EscapeScenarioCondition extends ScenarioCondition{
             }
         }
         return combined;
+    }
+
+    /**
+     * Converts to string representation
+     * @return String representation
+     */
+    @Override
+    public String toString() {
+        String returnString = "";
+        returnString += "Current room: " + mLevel.toString() + "\n";
+        returnString += "Current action: " + mGameAction.toString() + "\n";
+        returnString += "Current selection: " + mSelected.toString() + "\n";
+        returnString += "Current items: " + mItems.toString() + "\n";
+        returnString += "Current picked items: " + mPickedItems.toString() + "\n";
+
+        return returnString;
     }
 }

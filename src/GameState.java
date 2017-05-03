@@ -8,17 +8,16 @@ import java.util.ArrayList;
  *  - Current Items
  *  - Picked Items
  *
- *TODO compare game states
- *TODO gameAction is used null if don't care is selected
+ * TODO compare game states to find same states
  */
 class GameState {
-    EscapeScenarioCondition mCurrentCondition;
+    private final EscapeScenarioCondition mCurrentCondition;
 
     /**
      * Creates a new GameState using the {@link EscapeScenarioCondition}
      * @param escapeScenarioCondition Current condition of the game
      */
-    GameState(EscapeScenarioCondition escapeScenarioCondition) {
+    private GameState(EscapeScenarioCondition escapeScenarioCondition) {
         mCurrentCondition = escapeScenarioCondition;
     }
 
@@ -33,21 +32,21 @@ class GameState {
      */
     static GameState fromMenu(){
         GameCondition levelMenu = new GameCondition("MENU", GameCondition.State.TRUE);
-        GameCondition selectedMenu = new GameCondition("", GameCondition.State.TRUE);
+        GameCondition selectedMenu = new GameCondition("", GameCondition.State.FALSE);
         GameCondition gameAction = new GameCondition(EscapeGameAction.Option.PICK.name(), GameCondition.State.TRUE);
         ArrayList<GameCondition> pickedItems = new ArrayList<>();
         ArrayList<GameCondition> items = new ArrayList<>();
 
         EscapeScenarioCondition escapeScenarioCondition = new EscapeScenarioCondition(
                 levelMenu, selectedMenu, gameAction, pickedItems, items);
-        GameState gameState = new GameState( escapeScenarioCondition);
-        return gameState;
+        return new GameState( escapeScenarioCondition);
     }
 
     /**
      * Copy constructor, uses {@link EscapeScenarioCondition} to copy
      * @param gameState Another game state
      */
+    @SuppressWarnings("unused")
     GameState (GameState gameState){
         mCurrentCondition = new EscapeScenarioCondition(gameState.mCurrentCondition);
     }
@@ -66,4 +65,8 @@ class GameState {
             return null;
     }
 
+    @Override
+    public String toString() {
+        return mCurrentCondition.toString();
+    }
 }

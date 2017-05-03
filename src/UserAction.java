@@ -5,24 +5,14 @@
  */
 class UserAction {
 
-    EscapeScenarioCondition mPreCondition;
-    EscapeScenarioCondition mPostCondition;
-    private String mName;
+    final EscapeScenarioCondition mPreCondition;
+    final EscapeScenarioCondition mPostCondition;
+    @SuppressWarnings({"FieldCanBeLocal", "unused"})
+    private final String mName;
 
     UserAction (String name, EscapeScenarioCondition preCondition, EscapeScenarioCondition postCondition){
         mName = name;
         mPreCondition = preCondition;
         mPostCondition = postCondition;
     }
-
-//    GameState apply (GameState gameState){
-//        if ( gameState.mCurrentRoom.equals(mPreRoom)){
-//            GameState gameStateNew = new GameState ( gameState);
-//            gameStateNew.mCurrentRoom = mPostRoom;
-//
-//
-//            return gameStateNew;
-//        }else
-//            return null;
-//    }
 }
