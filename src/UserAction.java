@@ -15,4 +15,21 @@ class UserAction {
         mPreCondition = preCondition;
         mPostCondition = postCondition;
     }
+
+    /**
+     * String representation of the class
+     * @return Returns the name of the action
+     */
+    @Override
+    public String toString() {
+        return "User Action: " + mName;
+    }
+
+    /**
+     * Gets the name of the Action
+     * @return Name of the action
+     */
+    String getAction() {
+        return mName;
+    }
 }

@@ -28,13 +28,14 @@ class Main {
     private static void createTests(){
 
         GameState menuState = GameState.fromMenu();
-        GameGraph gameGraph = new GameGraph(menuState);
-        gameGraph.addUserAction( createStartAction());
-        gameGraph.addUserAction( createPickMakeUpAction());
-        gameGraph.addUserAction( createPickDoorHandleAction());
-//        gameGraph.addUserAction( createMenuAction());
+        GameGraphGenerator gameGraphGenerator = new GameGraphGenerator(menuState);
+        gameGraphGenerator.addUserAction( createStartAction());
+        gameGraphGenerator.addUserAction( createPickMakeUpAction());
+        gameGraphGenerator.addUserAction( createPickDoorHandleAction());
+        gameGraphGenerator.addUserAction( createMenuAction());
 
-        gameGraph.generate();
+        gameGraphGenerator.generate();
+        gameGraphGenerator.print();
     }
 
     /**

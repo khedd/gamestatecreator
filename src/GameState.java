@@ -41,7 +41,6 @@ class GameState {
                 levelMenu, selectedMenu, gameAction, pickedItems, items);
         return new GameState( escapeScenarioCondition);
     }
-
     /**
      * Copy constructor, uses {@link EscapeScenarioCondition} to copy
      * @param gameState Another game state
