@@ -8,14 +8,19 @@ import java.util.ArrayList;
  *  - Pick an item
  *  - Use an item
  *  - Select an item
- *  - Zoom on an item
  *  - Select{Use, Dismantle, Combine}
+ *  - Zoom on an item
+ *  - TODO Combine an item
+ *  - TODO Dismantle an item
+ *  - TODO Exit using an item
+ *
+ * TODO action definitions what it is meant by pick combine etc.
  */
 public class ActionFactory {
+
     /**
-     * TODO should reset subRoom
-     * Creates the UserAction that return to Menu from any level that is not MENU
-     * @return Return to menu action
+     * Creates an action that takes user back to Menu from every room
+     * @return Return to Menu Action
      */
     static UserAction createMenuAction(){
         EscapeScenarioCondition escapeScenarioConditionPreStart;
@@ -40,9 +45,12 @@ public class ActionFactory {
         return new UserAction("RETURN MENU", escapeScenarioConditionPreStart, escapeScenarioConditionPostStart);
     }
 
+
     /**
-     * Creates a start action that requires room to be menu and changes the level to Room
-     * @return Start the game action
+     * Creates a start action that is playable from Menu and takes to room and subRoom
+     * @param room Room to go after action takes place
+     * @param subRoom SubRoom to go after action takes place
+     * @return Start the game action that navigates from Menu -> {room, subRoom}
      */
     static UserAction createStartAction(@NotNull Enum<?> room, @NotNull GameRooms subRoom){
         EscapeScenarioCondition escapeScenarioConditionPreStart;
@@ -67,12 +75,13 @@ public class ActionFactory {
         return new UserAction("START GAME", escapeScenarioConditionPreStart, escapeScenarioConditionPostStart);
     }
 
+
     /**
-     * TODO add subRoom check
-     * @param item
-     * @param room
-     * @param subRoom
-     * @return
+     * Creates a pick action of item in room, subRoom
+     * @param item Item to be picked
+     * @param room Room that item is in
+     * @param subRoom SubRoom that item is in
+     * @return A pick action of item in room, subRoom
      */
     static UserAction createPickAction (@NotNull Enum<?> item, @NotNull GameRooms room, @NotNull  GameRooms subRoom){
         EscapeScenarioCondition escapeScenarioConditionPreStart;
@@ -102,8 +111,10 @@ public class ActionFactory {
     }
 
     /**
-     * Creates an action that enables user to select the makeup item in the room
-     * @return Select MakeUp action
+     * Creates a select action of an item in room
+     * @param item Item that can be selected
+     * @param room Room that selection can happen
+     * @return A selection action of item that can be used in room
      */
     static UserAction createSelectAction(@NotNull Enum<?> item, @NotNull GameRooms room){
         EscapeScenarioCondition escapeScenarioConditionPreStart;
@@ -128,10 +139,12 @@ public class ActionFactory {
     }
 
     /**
-     * Creates an action that enables user to select the makeup item in the room
-     * @return Select MakeUp action
+     * Creates a deselect action of an item in room
+     * @param item Item that can be deselected
+     * @param room Room that deselection can happen
+     * @return A deselection action of item that can be used in room
      */
-    static UserAction createUnSelectAction(@NotNull Enum<?> item, @NotNull GameRooms room){
+    static UserAction createDeselectAction(@NotNull Enum<?> item, @NotNull GameRooms room){
         EscapeScenarioCondition escapeScenarioConditionPreStart;
         GameCondition preLevelCond = new GameCondition(room.name(), GameCondition.State.TRUE);
         GameCondition preSelectedCond = new GameCondition(item.name(), GameCondition.State.TRUE);
@@ -150,12 +163,14 @@ public class ActionFactory {
         escapeScenarioConditionPreStart = new EscapeScenarioCondition(preLevelCond, preSelectedCond, preGameActCond, preItems, prePickedItems);
         escapeScenarioConditionPostStart = new EscapeScenarioCondition(postLevelCond, postSelectedCond, postGameActCond, postItems, postPickedItems);
 
-        return new UserAction("UNSELECT " + item.name(), escapeScenarioConditionPreStart, escapeScenarioConditionPostStart);
+        return new UserAction("DESELECT " + item.name(), escapeScenarioConditionPreStart, escapeScenarioConditionPostStart);
     }
 
     /**
-     * Creates an action that enables user to select the makeup item in the room
-     * @return Select MakeUp action
+     * Creates a select exit action of an item in room
+     * @param item Item that selection can be exited using UI navigation
+     * @param room Room that selection exit can happen
+     * @return A selection exit action of item that can be used in room
      */
     static UserAction createSelectExitAction(@NotNull Enum<?> item, @NotNull GameRooms room){
         EscapeScenarioCondition escapeScenarioConditionPreStart;
@@ -180,8 +195,10 @@ public class ActionFactory {
     }
 
     /**
-     * Creates an action that enables user to select use the makeup item in the room
-     * @return SelectUse MakeUp action
+     * Creates a select use action of an item in room
+     * @param item Item that selection can be used using UI navigation
+     * @param room Room that selection use can happen
+     * @return A selection use action of item that can be used in room
      */
     static UserAction createSelectUseAction(@NotNull Enum<?> item, @NotNull GameRooms room){
         EscapeScenarioCondition escapeScenarioConditionPreStart;
@@ -206,8 +223,11 @@ public class ActionFactory {
     }
 
     /**
-     * Creates an action that enables user to use the makeup item in the room
-     * @return Use MakeUp action
+     * Creates a use action of item that can be used in room, subRoom
+     * @param item Item to be used
+     * @param room Room that item can be used in
+     * @param subRoom SubRoom that item can be used in
+     * @return An action describes use action
      */
     static UserAction createUseAction(@NotNull Enum<?> item, @NotNull GameRooms room, @Nullable GameRooms subRoom){
         EscapeScenarioCondition escapeScenarioConditionPreStart;
@@ -243,8 +263,13 @@ public class ActionFactory {
     }
 
     /**
-     * Creates an action that enables user to use the makeup item in the room
-     * @return Use MakeUp action
+     * Creates a zoom action that navigates the user from currentSubRoom to newSubRoom
+     * @param item Item used to navigate the user TODO not being used
+     * @param room Room that item can be used to zoom
+     * @param currentSubRoom currentSubRoom that item can be used to zoom
+     * @param newSubRoom NewSubRoom to navigate to
+     * @return An action describing a zoom action of clicking an object that takes user
+     * to another newSubRoom
      */
     static UserAction createZoomAction(@NotNull Enum<?> item, @NotNull GameRooms room, @NotNull GameRooms currentSubRoom, @NotNull GameRooms newSubRoom){
         EscapeScenarioCondition escapeScenarioConditionPreStart;
@@ -270,9 +295,13 @@ public class ActionFactory {
 
         return new UserAction("ZOOM " + item.name(), escapeScenarioConditionPreStart, escapeScenarioConditionPostStart);
     }
+
     /**
-     * Creates an action that enables user to use the makeup item in the room
-     * @return Use MakeUp action
+     * Creates a back action to navigate to the initial subRoom, can be used after {@link #createZoomAction(Enum, GameRooms, GameRooms, GameRooms)}
+     * @param room Current room
+     * @param currentSubRoom SubRoom that back action exists
+     * @param newSubRoom SubRoom that user will navigate after the action
+     * @return An action used to return to initial room after zoom operation
      */
     static UserAction createBackAction(@NotNull GameRooms room, @NotNull GameRooms currentSubRoom, @NotNull GameRooms newSubRoom){
         EscapeScenarioCondition escapeScenarioConditionPreStart;
