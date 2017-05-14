@@ -1,8 +1,8 @@
 ## ROAD MAP ##
 
 * Loop Detection -- Done
-- java graph implementation -- Done No Pretty Printing
-- Cycle Detection For Given Count -- Set As One
+  * java graph implementation -- Done No Pretty Printing
+  * Cycle Detection For Given Count -- Set As One
 * Game With All Actions -- Almost Done See Below
 * Output For Bots To Play
 * Path Checking From Given Played Sequence
