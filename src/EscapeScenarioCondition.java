@@ -14,12 +14,39 @@ class EscapeScenarioCondition extends ScenarioCondition{
 
     private ArrayList<GameCondition> mPickedItems;
     private ArrayList<GameCondition> mItems;
+    private ArrayList<GameCondition> mUsedItems;
     private final GameCondition mSelected;
     private final GameCondition mLevel;
     private final GameCondition mGameAction;
+    private final GameCondition mSubRoom;
 
     /**
-     * Constructor for creating an {@link EscapeScenarioCondition} with all details
+     * Constructor for creating an {@link EscapeScenarioCondition} with all details, initializes subRoom
+     * as empty and mUsedItems as empty set
+     * @param level level/room requirement for this condition or post level after taking the action
+     * @param selected is an item selected to take the action or post selection
+     * @param gameAction what has to be the current action of the user, or what is post action of the user
+     * @param pickedItems what are the picked items of the user or what will be the picked items of the user
+     * @param items what are the items of the user or what will be the items of the user
+     */
+    @Deprecated
+    EscapeScenarioCondition ( GameCondition level, GameCondition selected, GameCondition gameAction,
+                              ArrayList<GameCondition> items, ArrayList<GameCondition> pickedItems){
+
+        mLevel          = level;
+        mSelected       = selected;
+        mUsedItems      = new ArrayList<>();
+        mGameAction     = gameAction;
+        mPickedItems    = pickedItems;
+        mItems          = items;
+        mSubRoom        = new GameCondition();
+    }
+
+
+    /**
+     * Constructor for creating an {@link EscapeScenarioCondition} with all details, initializes subRoom
+     * @param usedItems used items in the condition
+     * @param subRoom current subroom in addition to the current room
      * @param level level/room requirement for this condition or post level after taking the action
      * @param selected is an item selected to take the action or post selection
      * @param gameAction what has to be the current action of the user, or what is post action of the user
@@ -27,13 +54,16 @@ class EscapeScenarioCondition extends ScenarioCondition{
      * @param items what are the items of the user or what will be the items of the user
      */
     EscapeScenarioCondition ( GameCondition level, GameCondition selected, GameCondition gameAction,
-                              ArrayList<GameCondition> items, ArrayList<GameCondition> pickedItems){
+                              ArrayList<GameCondition> items, ArrayList<GameCondition> pickedItems,
+                              ArrayList<GameCondition> usedItems, GameCondition subRoom){
 
         mLevel          = level;
         mSelected       = selected;
+        mUsedItems      = usedItems;
         mGameAction     = gameAction;
         mPickedItems    = pickedItems;
         mItems          = items;
+        mSubRoom        = subRoom;
     }
 
     /**
@@ -48,11 +78,17 @@ class EscapeScenarioCondition extends ScenarioCondition{
         for ( GameCondition gameCondition: escapeScenarioCondition.mItems){
             mItems.add( new GameCondition( gameCondition));
         }
+        for ( GameCondition gameCondition: escapeScenarioCondition.mUsedItems){
+            mUsedItems.add( new GameCondition( gameCondition));
+        }
         mSelected = new GameCondition( escapeScenarioCondition.mSelected);
         mLevel = new GameCondition( escapeScenarioCondition.mLevel);
+        mSubRoom = new GameCondition( escapeScenarioCondition.mSubRoom);
+
     }
 
     /**
+     * TODO check loops, might exit if condition is false
      * Compares this condition to other condition
      * @param mPreCondition Pre condition to be compared
      * @return if mPreCondition is subset of current condition returns true else false
@@ -62,22 +98,37 @@ class EscapeScenarioCondition extends ScenarioCondition{
         status =  mGameAction.compare(mPreCondition.mGameAction);
         status &= mLevel.compare( mPreCondition.mLevel);
         status &= mSelected.compare( mPreCondition.mSelected);
-        //todo bad loops
-        for (GameCondition mFItem: mItems) {
-            for (GameCondition mSItem: mPreCondition.mItems) {
-                if (Objects.equals(mFItem.getName(), mSItem.getName())){
-                    status &= mFItem.compare( mSItem);
+        status &= mSubRoom.compare( mPreCondition.mSubRoom);
+
+        status &= compareLists(mItems, mPreCondition.mItems);
+        status &= compareLists(mPickedItems, mPreCondition.mPickedItems);
+        status &= compareLists(mUsedItems, mPreCondition.mUsedItems);
+        return status;
+    }
+
+    /**
+     * Compares two lists of {@link GameCondition}
+     * @param first Our current list
+     * @param second List to be compared to the first list
+     * @return status of comparison TODO not sure of method
+     */
+    private boolean compareLists (ArrayList<GameCondition> first, ArrayList<GameCondition> second){
+        boolean status = true;
+        for (GameCondition firstGameCondition: first) {
+            for (GameCondition secondGameCondition: second) {
+                if (Objects.equals(firstGameCondition.getName(), secondGameCondition.getName())){
+                    status &= firstGameCondition.compare( secondGameCondition);
                 }
             }
         }
 
         //check the inner loop for TRUE
-        for (GameCondition mSItem: mPreCondition.mItems) {
+        for (GameCondition secondGameCondition: second) {
             //if the condition is true it must exist in the other
-            if (mSItem.getState() == GameCondition.State.TRUE){
+            if (secondGameCondition.getState() == GameCondition.State.TRUE){
                 boolean found = false;
-                for (GameCondition mFItem: mItems) {
-                    if (Objects.equals(mFItem.getName(), mSItem.getName())){
+                for (GameCondition firstGameCondition: first) {
+                    if (Objects.equals(firstGameCondition.getName(), secondGameCondition.getName())){
                         found = true;
                         break;
                     }
@@ -86,17 +137,8 @@ class EscapeScenarioCondition extends ScenarioCondition{
                     status &= found;
             }
         }
-
-        for (GameCondition mFItem: mPickedItems) {
-            for (GameCondition mSItem: mPreCondition.mPickedItems) {
-                if (Objects.equals(mFItem.getName(), mSItem.getName())){
-                    status &= mFItem.compare( mSItem);
-                }
-            }
-        }
         return status;
     }
-
     /**
      * Applies another condition thus creating a new condition
      * @param mPostCondition Post condition that will shape this condition
@@ -110,10 +152,11 @@ class EscapeScenarioCondition extends ScenarioCondition{
 
         GameCondition level = mLevel.apply ( mPostCondition.mLevel);
         GameCondition gameAction = mGameAction.apply ( mPostCondition.mGameAction);
+        GameCondition subRoom = mSubRoom.apply( mPostCondition.mSubRoom);
         ArrayList<GameCondition> gamePickedItems = combineLists(mPickedItems, mPostCondition.mPickedItems);
         ArrayList<GameCondition> gameItems = combineLists(mItems, mPostCondition.mItems);
-
-        return new EscapeScenarioCondition(level, selected, gameAction, gameItems, gamePickedItems);
+        ArrayList<GameCondition> usedItems = combineLists(mUsedItems, mPostCondition.mUsedItems);
+        return new EscapeScenarioCondition(level, selected, gameAction, gameItems, gamePickedItems, usedItems, subRoom);
     }
 
     /**
@@ -122,7 +165,7 @@ class EscapeScenarioCondition extends ScenarioCondition{
      * first list is copied to another list and apply method is called on copies
      * TODO use requires element to disappear so a condition like FALSE will be applied to TRUE however apply does not handle
      * @param first Our current list
-     * @param second List to be applied to the second list
+     * @param second List to be applied to the first list
      * @return Subset of these two sets
      */
     private ArrayList<GameCondition> combineLists(ArrayList<GameCondition> first, ArrayList<GameCondition> second){
@@ -157,9 +200,11 @@ class EscapeScenarioCondition extends ScenarioCondition{
     public String toString() {
         String returnString = "";
         returnString += "Current room: " + mLevel.toString() + "\n";
+        returnString += "Sub room: " + mSubRoom.toString() + "\n";
         returnString += "Current action: " + mGameAction.toString() + "\n";
         returnString += "Current selection: " + mSelected.toString() + "\n";
         returnString += "Current items: " + mItems.toString() + "\n";
+        returnString += "Current used items: " + mUsedItems.toString() + "\n";
         returnString += "Current picked items: " + mPickedItems.toString() + "\n";
 
         return returnString;
