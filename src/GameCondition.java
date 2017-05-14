@@ -10,8 +10,8 @@ class GameCondition {
     /**
      * Name of the condition
      */
-    private final String mName;
-    private final State mState;
+    private String mName;
+    private State mState;
 
     /**
      * Creates a condition with {@link GameCondition.State#DONT_CARE}
@@ -57,6 +57,29 @@ class GameCondition {
     }
 
     /**
+     * @return State of the GameCondition
+     */
+    State getState (){
+        return mState;
+    }
+    /**
+     * Applies the game state to the new game state
+     * @param gameCondition another game condition to create a condition that
+     *                      is subset of these two condition
+     */
+    void applyUpdate(GameCondition gameCondition) {
+        if ( gameCondition.mState == State.DONT_CARE){
+            mName = "";
+            mState = State.DONT_CARE;
+        }
+        else{
+            mName = gameCondition.mName;
+            mState = gameCondition.mState;
+        }
+
+    }
+
+    /**
      * Applies the game state to the new game state
      * @param gameCondition another game condition to create a condition that
      *                      is subset of these two condition
@@ -85,7 +108,7 @@ class GameCondition {
     public String toString() {
         return mName + " " + mState.name();
     }
-
+    {}
     /**
      * Game condition states
      * DON'T_CARE is used to annotate that every condition is okay

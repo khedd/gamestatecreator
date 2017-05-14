@@ -3,6 +3,12 @@ import java.util.Objects;
 
 /**
  * Scenario conditions that exists in Escape Games. Used to determine the
+ *
+ * Design Decisions Made:
+ *  - during {@link #combineLists(ArrayList, ArrayList)} if combined list elements state is false
+ *  it is removed from list however removing is inefficiently implemented
+ *  - in {@link #apply(EscapeScenarioCondition)} if current selection is false it os converted to
+ *  {@link GameCondition#GameCondition()} default constructor
  */
 class EscapeScenarioCondition extends ScenarioCondition{
 
@@ -21,7 +27,7 @@ class EscapeScenarioCondition extends ScenarioCondition{
      * @param items what are the items of the user or what will be the items of the user
      */
     EscapeScenarioCondition ( GameCondition level, GameCondition selected, GameCondition gameAction,
-                             ArrayList<GameCondition> pickedItems, ArrayList<GameCondition> items){
+                              ArrayList<GameCondition> items, ArrayList<GameCondition> pickedItems){
 
         mLevel          = level;
         mSelected       = selected;
@@ -65,6 +71,22 @@ class EscapeScenarioCondition extends ScenarioCondition{
             }
         }
 
+        //check the inner loop for TRUE
+        for (GameCondition mSItem: mPreCondition.mItems) {
+            //if the condition is true it must exist in the other
+            if (mSItem.getState() == GameCondition.State.TRUE){
+                boolean found = false;
+                for (GameCondition mFItem: mItems) {
+                    if (Objects.equals(mFItem.getName(), mSItem.getName())){
+                        found = true;
+                        break;
+                    }
+                }
+                if ( !found)
+                    status &= found;
+            }
+        }
+
         for (GameCondition mFItem: mPickedItems) {
             for (GameCondition mSItem: mPreCondition.mPickedItems) {
                 if (Objects.equals(mFItem.getName(), mSItem.getName())){
@@ -82,12 +104,16 @@ class EscapeScenarioCondition extends ScenarioCondition{
      */
     EscapeScenarioCondition apply(EscapeScenarioCondition mPostCondition) {
         GameCondition selected = mSelected.apply ( mPostCondition.mSelected);
+        //check selected for false
+        if ( selected.getState() == GameCondition.State.FALSE)
+            selected = new GameCondition();
+
         GameCondition level = mLevel.apply ( mPostCondition.mLevel);
         GameCondition gameAction = mGameAction.apply ( mPostCondition.mGameAction);
-        ArrayList<GameCondition> gamePickedItems = combineLists(mItems, mPostCondition.mItems);
+        ArrayList<GameCondition> gamePickedItems = combineLists(mPickedItems, mPostCondition.mPickedItems);
         ArrayList<GameCondition> gameItems = combineLists(mItems, mPostCondition.mItems);
 
-        return new EscapeScenarioCondition(level, selected, gameAction, gamePickedItems, gameItems);
+        return new EscapeScenarioCondition(level, selected, gameAction, gameItems, gamePickedItems);
     }
 
     /**
@@ -107,9 +133,12 @@ class EscapeScenarioCondition extends ScenarioCondition{
         }
         for (GameCondition gameConditionSecond: second) {
             boolean found = false;
-            for (GameCondition gameConditionFirst: combined) {
+            for (GameCondition gameConditionFirst: new ArrayList<>(combined)) {
                 if (Objects.equals(gameConditionFirst.getName(), gameConditionSecond.getName())){
-                    gameConditionFirst.apply( gameConditionSecond);
+                    gameConditionFirst.applyUpdate( gameConditionSecond);
+                    //if the item is false remove it
+                    if ( gameConditionFirst.getState() == GameCondition.State.FALSE)
+                        combined.remove(gameConditionFirst);
                     found = true;
                 }
             }

@@ -38,7 +38,7 @@ class GameState {
         ArrayList<GameCondition> items = new ArrayList<>();
 
         EscapeScenarioCondition escapeScenarioCondition = new EscapeScenarioCondition(
-                levelMenu, selectedMenu, gameAction, pickedItems, items);
+                levelMenu, selectedMenu, gameAction, items, pickedItems);
         return new GameState( escapeScenarioCondition);
     }
     /**

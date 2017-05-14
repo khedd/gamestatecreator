@@ -31,6 +31,9 @@ class Main {
         GameGraphGenerator gameGraphGenerator = new GameGraphGenerator(menuState);
         gameGraphGenerator.addUserAction( createStartAction());
         gameGraphGenerator.addUserAction( createPickMakeUpAction());
+        gameGraphGenerator.addUserAction( createSelectMakeUpAction());
+        gameGraphGenerator.addUserAction( createSelectUseMakeUpAction());
+        gameGraphGenerator.addUserAction( createUseMakeUpAction());
         gameGraphGenerator.addUserAction( createPickDoorHandleAction());
         gameGraphGenerator.addUserAction( createMenuAction());
 
@@ -116,6 +119,86 @@ class Main {
 
         return new UserAction("PICK MAKE UP", escapeScenarioConditionPreStart, escapeScenarioConditionPostStart);
     }
+
+    /**
+     * Creates an action that enables user to select the makeup item in the room
+     * @return Select MakeUp action
+     */
+    private static UserAction createSelectMakeUpAction(){
+        EscapeScenarioCondition escapeScenarioConditionPreStart;
+        GameCondition preLevelCond = new GameCondition("ROOM", GameCondition.State.TRUE);
+        GameCondition preSelectedCond = new GameCondition("MAKE UP IT", GameCondition.State.FALSE);
+        GameCondition preGameActCond =  new GameCondition(EscapeGameAction.Option.PICK.name(), GameCondition.State.TRUE);
+        ArrayList<GameCondition> preItems = new ArrayList<>();
+        preItems.add( new GameCondition("MAKE UP IT", GameCondition.State.TRUE));
+        ArrayList<GameCondition> prePickedItems = new ArrayList<>();
+
+        EscapeScenarioCondition escapeScenarioConditionPostStart;
+        GameCondition postLevelCond = new GameCondition("ROOM", GameCondition.State.TRUE);
+        GameCondition postSelectedCond = new GameCondition("MAKE UP IT", GameCondition.State.TRUE);
+        GameCondition postGameActCond =  new GameCondition(EscapeGameAction.Option.SELECT.name(), GameCondition.State.TRUE);
+        ArrayList<GameCondition> postItems = new ArrayList<>();
+        ArrayList<GameCondition> postPickedItems = new ArrayList<>();
+
+        escapeScenarioConditionPreStart = new EscapeScenarioCondition(preLevelCond, preSelectedCond, preGameActCond, preItems, prePickedItems);
+        escapeScenarioConditionPostStart = new EscapeScenarioCondition(postLevelCond, postSelectedCond, postGameActCond, postItems, postPickedItems);
+
+        return new UserAction("SELECT MAKE UP", escapeScenarioConditionPreStart, escapeScenarioConditionPostStart);
+    }
+
+    /**
+     * Creates an action that enables user to select use the makeup item in the room
+     * @return SelectUse MakeUp action
+     */
+    private static UserAction createSelectUseMakeUpAction(){
+        EscapeScenarioCondition escapeScenarioConditionPreStart;
+        GameCondition preLevelCond = new GameCondition("ROOM", GameCondition.State.TRUE);
+        GameCondition preSelectedCond = new GameCondition("MAKE UP IT", GameCondition.State.TRUE);
+        GameCondition preGameActCond =  new GameCondition(EscapeGameAction.Option.SELECT.name(), GameCondition.State.TRUE);
+        ArrayList<GameCondition> preItems = new ArrayList<>();
+        preItems.add( new GameCondition("MAKE UP IT", GameCondition.State.TRUE));
+        ArrayList<GameCondition> prePickedItems = new ArrayList<>();
+
+        EscapeScenarioCondition escapeScenarioConditionPostStart;
+        GameCondition postLevelCond = new GameCondition("ROOM", GameCondition.State.TRUE);
+        GameCondition postSelectedCond = new GameCondition();
+        GameCondition postGameActCond =  new GameCondition(EscapeGameAction.Option.USE.name(), GameCondition.State.TRUE);
+        ArrayList<GameCondition> postItems = new ArrayList<>();
+        ArrayList<GameCondition> postPickedItems = new ArrayList<>();
+
+        escapeScenarioConditionPreStart = new EscapeScenarioCondition(preLevelCond, preSelectedCond, preGameActCond, preItems, prePickedItems);
+        escapeScenarioConditionPostStart = new EscapeScenarioCondition(postLevelCond, postSelectedCond, postGameActCond, postItems, postPickedItems);
+
+        return new UserAction("SELECT_USE MAKE UP", escapeScenarioConditionPreStart, escapeScenarioConditionPostStart);
+    }
+
+    /**
+     * Creates an action that enables user to use the makeup item in the room
+     * @return Use MakeUp action
+     */
+    private static UserAction createUseMakeUpAction(){
+        EscapeScenarioCondition escapeScenarioConditionPreStart;
+        GameCondition preLevelCond = new GameCondition("ROOM", GameCondition.State.TRUE);
+        GameCondition preSelectedCond = new GameCondition("MAKE UP IT", GameCondition.State.TRUE);
+        GameCondition preGameActCond =  new GameCondition(EscapeGameAction.Option.USE.name(), GameCondition.State.TRUE);
+        ArrayList<GameCondition> preItems = new ArrayList<>();
+        preItems.add( new GameCondition("MAKE UP IT", GameCondition.State.TRUE));
+        ArrayList<GameCondition> prePickedItems = new ArrayList<>();
+
+        EscapeScenarioCondition escapeScenarioConditionPostStart;
+        GameCondition postLevelCond = new GameCondition("ROOM", GameCondition.State.TRUE);
+        GameCondition postSelectedCond = new GameCondition("MAKE UP IT", GameCondition.State.FALSE);
+        GameCondition postGameActCond =  new GameCondition(EscapeGameAction.Option.PICK.name(), GameCondition.State.TRUE);
+        ArrayList<GameCondition> postItems = new ArrayList<>();
+        postItems.add( new GameCondition("MAKE UP IT", GameCondition.State.FALSE));
+        ArrayList<GameCondition> postPickedItems = new ArrayList<>();
+
+        escapeScenarioConditionPreStart = new EscapeScenarioCondition(preLevelCond, preSelectedCond, preGameActCond, preItems, prePickedItems);
+        escapeScenarioConditionPostStart = new EscapeScenarioCondition(postLevelCond, postSelectedCond, postGameActCond, postItems, postPickedItems);
+
+        return new UserAction("USE MAKE UP", escapeScenarioConditionPreStart, escapeScenarioConditionPostStart);
+    }
+
 
     /**
      * Creates an action that enables user to pick the door handle item in the room
