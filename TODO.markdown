@@ -6,10 +6,13 @@
  - [x] Add subRoom to EscapeScenarioCondition
  - [x] Create an ActionFactory
  - [x] Class for Items that exist in Rooms
- - [ ] SubRoom for pick action
+ - [x] SubRoom for pick action
  - [ ] Javadoc for ActionFactory
- - [ ] Update Used List
+ - [x] Update Used List
 
 ### 2017-05-15 ###
- - [ ] CombineAction
- - [ ] ExitAction
+ - [ ] Combine Action
+ - [ ] Exit Action
+
+### 2017-05-16 ###
+ - [ ] Dismantle Action
