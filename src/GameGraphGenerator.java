@@ -38,7 +38,7 @@ class GameGraphGenerator {
 //                System.out.println("***************************************");
 //                System.out.println( newGameState.toString());
                 GraphNode newGraphNode = new GraphNode(uAction, newGameState);
-                if (!graphNode.AddNode( newGraphNode)) {
+                if (graphNode.AddNode( newGraphNode)) {
                     generate( newGraphNode);
                 }
             }

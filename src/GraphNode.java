@@ -37,9 +37,9 @@ public class GraphNode {
         node.mParent = this;
         if (!node.checkCycleParentAndPrune()) {
             mNodes.add(node);
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 
     /**
@@ -49,13 +49,14 @@ public class GraphNode {
     private boolean checkCycleParentAndPrune(){
         ArrayList<UserAction> names = new ArrayList<>();
         checkCycleParentHelperGetNames ( names);
+
         int cycleLength = checkCycle( names);
         if ( cycleLength != 0){
             pruneParentCycleFromGraph(this, cycleLength);
             return true;
         }else
         {
-            return false;
+            return names.size() >= 10;
         }
     }
 

@@ -29,7 +29,6 @@ class EscapeScenarioCondition extends ScenarioCondition{
      * @param pickedItems what are the picked items of the user or what will be the picked items of the user
      * @param items what are the items of the user or what will be the items of the user
      */
-    @Deprecated
     EscapeScenarioCondition ( GameCondition level, GameCondition selected, GameCondition gameAction,
                               ArrayList<GameCondition> items, ArrayList<GameCondition> pickedItems){
 
@@ -134,7 +133,7 @@ class EscapeScenarioCondition extends ScenarioCondition{
                     }
                 }
                 if ( !found)
-                    status &= found;
+                    status &= false;
             }
         }
         return status;
