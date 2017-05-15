@@ -56,7 +56,7 @@ public class GraphNode {
             return true;
         }else
         {
-            return names.size() >= 10;
+            return names.size() >= 15;
         }
     }
 

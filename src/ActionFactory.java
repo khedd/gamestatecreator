@@ -368,6 +368,40 @@ public class ActionFactory {
     }
 
     /**
+     * Creates an exit action that checks if the item exists, only drawback is that it requires item to be used
+     * However this is the only case available in our game
+     * @param item Item to be checked in used list
+     * @param room Room requirement of exit condition
+     * @param subRoom SubRoom requirement of exit condition
+     * @return An exit action described by picking item which is in used list and action is available only in
+     * room and subRoom
+     */
+    static UserAction createExitAction (@NotNull Enum<?> item, @NotNull GameRooms room, @NotNull  GameRooms subRoom){
+        EscapeScenarioCondition escapeScenarioConditionPreStart;
+        GameCondition preLevelCond = new GameCondition(room.name(), GameCondition.State.TRUE);
+        GameCondition preSelectedCond = new GameCondition();
+        GameCondition preGameActCond =  new GameCondition(EscapeGameAction.Option.PICK.name(), GameCondition.State.TRUE);
+        ArrayList<GameCondition> preItems = new ArrayList<>();
+        ArrayList<GameCondition> prePickedItems = new ArrayList<>();
+        ArrayList<GameCondition> preUsedItems = new ArrayList<>();
+        preUsedItems.add( new GameCondition( item.name(), GameCondition.State.TRUE));
+        GameCondition preSubRoom = new GameCondition(subRoom.name(), GameCondition.State.TRUE);
+
+        EscapeScenarioCondition escapeScenarioConditionPostStart;
+        GameCondition postLevelCond = new GameCondition("THE END", GameCondition.State.TRUE);
+        GameCondition postSelectedCond = new GameCondition();
+        GameCondition postGameActCond =  new GameCondition();
+        ArrayList<GameCondition> postItems = new ArrayList<>();
+        ArrayList<GameCondition> postPickedItems = new ArrayList<>();
+
+        escapeScenarioConditionPreStart = new EscapeScenarioCondition(preLevelCond, preSelectedCond, preGameActCond, preItems, prePickedItems, preUsedItems, preSubRoom);
+        escapeScenarioConditionPostStart = new EscapeScenarioCondition(postLevelCond, postSelectedCond, postGameActCond, postItems, postPickedItems);
+
+        return new UserAction("EXIT " +  item.name(), escapeScenarioConditionPreStart, escapeScenarioConditionPostStart);
+
+    }
+
+    /**
      * Creates a back action to navigate to the initial subRoom, can be used after {@link #createZoomAction(Enum, GameRooms, GameRooms, GameRooms)}
      * @param room Current room
      * @param currentSubRoom SubRoom that back action exists
