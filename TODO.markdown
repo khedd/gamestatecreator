@@ -11,10 +11,9 @@
  - [x] Update Used List
 
 ### 2017-05-15 ###
- - [ ] Select Combine Action
- - [ ] Combine Action
+ - [x] Select Combine Action
+ - [x] Combine Action
  - [ ] Exit Action
 
 ### 2017-05-16 ###
- - [ ] Select Dismantle Action
  - [ ] Dismantle Action

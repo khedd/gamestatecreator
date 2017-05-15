@@ -2,6 +2,7 @@ import com.sun.istack.internal.NotNull;
 import com.sun.istack.internal.Nullable;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 
 /**
  * Used to create actions from {@link EscapeGameAction} such as:
@@ -220,6 +221,76 @@ public class ActionFactory {
         escapeScenarioConditionPostStart = new EscapeScenarioCondition(postLevelCond, postSelectedCond, postGameActCond, postItems, postPickedItems);
 
         return new UserAction("SELECT_USE " + item.name() , escapeScenarioConditionPreStart, escapeScenarioConditionPostStart);
+    }
+
+    /**
+     * Creates a select combine action of an item in room
+     * @param item Item that selection can be combined using UI navigation
+     * @param room Room that selection combine can happen
+     * @return A selection combine action of item that can be used in room
+     */
+    static UserAction createSelectCombineAction(@NotNull Enum<?> item, @NotNull GameRooms room){
+        EscapeScenarioCondition escapeScenarioConditionPreStart;
+        GameCondition preLevelCond = new GameCondition(room.name(), GameCondition.State.TRUE);
+        GameCondition preSelectedCond = new GameCondition(item.name(), GameCondition.State.TRUE);
+        GameCondition preGameActCond =  new GameCondition(EscapeGameAction.Option.SELECT.name(), GameCondition.State.TRUE);
+        ArrayList<GameCondition> preItems = new ArrayList<>();
+        preItems.add( new GameCondition(item.name(), GameCondition.State.TRUE));
+        ArrayList<GameCondition> prePickedItems = new ArrayList<>();
+
+        EscapeScenarioCondition escapeScenarioConditionPostStart;
+        GameCondition postLevelCond = new GameCondition(room.name(), GameCondition.State.TRUE);
+        GameCondition postSelectedCond = new GameCondition();
+        GameCondition postGameActCond =  new GameCondition(EscapeGameAction.Option.COMBINE.name(), GameCondition.State.TRUE);
+        ArrayList<GameCondition> postItems = new ArrayList<>();
+        ArrayList<GameCondition> postPickedItems = new ArrayList<>();
+
+        escapeScenarioConditionPreStart = new EscapeScenarioCondition(preLevelCond, preSelectedCond, preGameActCond, preItems, prePickedItems);
+        escapeScenarioConditionPostStart = new EscapeScenarioCondition(postLevelCond, postSelectedCond, postGameActCond, postItems, postPickedItems);
+
+        return new UserAction("SELECT_COMBINE " + item.name() , escapeScenarioConditionPreStart, escapeScenarioConditionPostStart);
+    }
+
+    /**
+     * Creates a combine action that itemF + itemS => itemCombined. Should be noted that reverse combination
+     * should also be called.
+     * @param itemF First item that can be combined
+     * @param itemS Second item that can be combined
+     * @param itemCombined Resultant item after combination
+     * @param room Room requirement for combine action
+     * @return A combine action that takes itemF and itemS and results in itemCombined
+     */
+    static UserAction createCombineAction(@NotNull Enum<?> itemF, @NotNull Enum<?> itemS, @NotNull Enum<?> itemCombined, @NotNull GameRooms room){
+        EscapeScenarioCondition escapeScenarioConditionPreStart;
+        GameCondition preLevelCond = new GameCondition(room.name(), GameCondition.State.TRUE);
+        GameCondition preSelectedCond = new GameCondition(itemF.name(), GameCondition.State.TRUE);
+        GameCondition preGameActCond =  new GameCondition(EscapeGameAction.Option.COMBINE.name(), GameCondition.State.TRUE);
+        ArrayList<GameCondition> preItems = new ArrayList<>();
+        preItems.add( new GameCondition(itemF.name(), GameCondition.State.TRUE));
+        preItems.add( new GameCondition(itemS.name(), GameCondition.State.TRUE));
+        ArrayList<GameCondition> prePickedItems = new ArrayList<>();
+
+        EscapeScenarioCondition escapeScenarioConditionPostStart;
+        GameCondition postLevelCond = new GameCondition(room.name(), GameCondition.State.TRUE);
+        GameCondition postSelectedCond = new GameCondition();
+        GameCondition postGameActCond =  new GameCondition(EscapeGameAction.Option.PICK.name(), GameCondition.State.TRUE);
+        ArrayList<GameCondition> postItems = new ArrayList<>();
+        postItems.add( new GameCondition(itemF.name(), GameCondition.State.FALSE));
+        postItems.add( new GameCondition(itemS.name(), GameCondition.State.FALSE));
+        postItems.add( new GameCondition(itemCombined.name(), GameCondition.State.TRUE));
+        ArrayList<GameCondition> postPickedItems = new ArrayList<>();
+
+        escapeScenarioConditionPreStart = new EscapeScenarioCondition(preLevelCond, preSelectedCond, preGameActCond, preItems, prePickedItems);
+        escapeScenarioConditionPostStart = new EscapeScenarioCondition(postLevelCond, postSelectedCond, postGameActCond, postItems, postPickedItems);
+
+        return new UserAction("COMBINE " + itemF.name() + " " + itemS.name() + " => " + itemCombined.name(), escapeScenarioConditionPreStart, escapeScenarioConditionPostStart);
+    }
+
+    /**
+     * TODO implementation
+     */
+    static UserAction createDismantleAction(@NotNull Enum<?> item, @NotNull EnumSet<?> dismantledItems, @NotNull GameRooms room){
+        return null;
     }
 
     /**
