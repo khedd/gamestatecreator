@@ -287,10 +287,41 @@ public class ActionFactory {
     }
 
     /**
-     * TODO implementation
+     * Creates a dismantle action. It dismantles the item and turns it to dismantledItems
+     * @param item item to be dismantled
+     * @param dismantledItems resultant items of dismantle operation
+     * @param room room requirement for this action
+     * @return An user action capable of dismantling the given item to dismantledItems in room
      */
     static UserAction createDismantleAction(@NotNull Enum<?> item, @NotNull EnumSet<?> dismantledItems, @NotNull GameRooms room){
-        return null;
+        EscapeScenarioCondition preESC;
+        GameCondition preLevelCond = new GameCondition(room.name(), GameCondition.State.TRUE);
+        GameCondition preSelectedCond = new GameCondition(item.name(), GameCondition.State.TRUE);
+        GameCondition preGameActCond =  new GameCondition(EscapeGameAction.Option.SELECT.name(), GameCondition.State.TRUE);
+        ArrayList<GameCondition> preItems = new ArrayList<>();
+        preItems.add( new GameCondition(item.name(), GameCondition.State.TRUE));
+        ArrayList<GameCondition> prePickedItems = new ArrayList<>();
+        GameCondition preSubRoomCond = new GameCondition();
+        ArrayList<GameCondition> preUsedItems = new ArrayList<>();
+
+        EscapeScenarioCondition postESC;
+        GameCondition postLevelCond = new GameCondition(room.name(), GameCondition.State.TRUE);
+        GameCondition postSelectedCond = new GameCondition(item.name(), GameCondition.State.FALSE);
+        GameCondition postGameActCond =  new GameCondition(EscapeGameAction.Option.PICK.name(), GameCondition.State.TRUE);
+        ArrayList<GameCondition> postItems = new ArrayList<>();
+        postItems.add( new GameCondition(item.name(), GameCondition.State.FALSE));
+        for (Enum<?> dismantledItem: dismantledItems) {
+            postItems.add( new GameCondition(dismantledItem.name(), GameCondition.State.TRUE));
+        }
+        ArrayList<GameCondition> postPickedItems = new ArrayList<>();
+        GameCondition postSubRoomCond = new GameCondition();
+        ArrayList<GameCondition> postUsedItems = new ArrayList<>();
+
+        preESC = new EscapeScenarioCondition(preLevelCond, preSelectedCond, preGameActCond, preItems, prePickedItems, preUsedItems, preSubRoomCond);
+        postESC = new EscapeScenarioCondition(postLevelCond, postSelectedCond, postGameActCond, postItems, postPickedItems, postUsedItems, postSubRoomCond);
+
+        return new UserAction("DISMANTLE " + item.name() + " " + dismantledItems.toString(), preESC, postESC);
+
     }
 
     /**
@@ -300,7 +331,7 @@ public class ActionFactory {
      * @param subRoom SubRoom that item can be used in
      * @return An action describes use action
      */
-    static UserAction createUseAction(@NotNull Enum<?> item, @NotNull GameRooms room, @Nullable GameRooms subRoom){
+    static UserAction createUseAction(@NotNull Enum<?> item, @NotNull GameRooms room, @NotNull GameRooms subRoom){
         EscapeScenarioCondition escapeScenarioConditionPreStart;
         GameCondition preLevelCond = new GameCondition(room.name(), GameCondition.State.TRUE);
         GameCondition preSelectedCond = new GameCondition(item.name(), GameCondition.State.TRUE);
@@ -309,13 +340,8 @@ public class ActionFactory {
         preItems.add( new GameCondition(item.name(), GameCondition.State.TRUE));
         ArrayList<GameCondition> prePickedItems = new ArrayList<>();
 
-        GameCondition preSubRoomCond;
+        GameCondition preSubRoomCond = new GameCondition(subRoom.name(), GameCondition.State.TRUE);
         ArrayList<GameCondition> preUsedItems = new ArrayList<>();
-        if ( subRoom == null){
-            preSubRoomCond = new GameCondition();
-        }else {
-            preSubRoomCond = new GameCondition(subRoom.name(), GameCondition.State.TRUE);
-        }
         EscapeScenarioCondition escapeScenarioConditionPostStart;
         GameCondition postLevelCond = new GameCondition(room.name(), GameCondition.State.TRUE);
         GameCondition postSelectedCond = new GameCondition(item.name(), GameCondition.State.FALSE);
