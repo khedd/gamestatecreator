@@ -14,7 +14,7 @@
  - [x] Select Combine Action
  - [x] Combine Action
  - [x] Exit Action
- - [ ] Dismantle Action
- - [ ] ActionFactory additional comments
+ - [x] Dismantle Action
 
 ### 2017-05-16 ###
+ - [x] ActionFactory additional comments

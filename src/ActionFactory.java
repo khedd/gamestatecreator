@@ -11,27 +11,28 @@ import java.util.EnumSet;
  *  - Select an item
  *  - Select{Use, Dismantle, Combine}
  *  - Zoom on an item
- *  - TODO Combine an item
- *  - TODO Dismantle an item
- *  - TODO Exit using an item
- *
- * TODO action definitions what it is meant by pick combine etc.
+ *  - Combine an item
+ *  - Dismantle an item
+ *  - Exit using an item
  */
 public class ActionFactory {
 
     /**
      * Creates an action that takes user back to Menu from every room
+     * Only changes the {@link EscapeScenarioCondition#mLevel}
      * @return Return to Menu Action
      */
     static UserAction createMenuAction(){
-        EscapeScenarioCondition escapeScenarioConditionPreStart;
+        EscapeScenarioCondition preESC;
+        //this exist in every level except Menu
         GameCondition preLevelCond = new GameCondition(GameRooms.MENU.name(), GameCondition.State.FALSE);
         GameCondition preSelectedCond = new GameCondition();
         GameCondition preGameActCond =  new GameCondition();
         ArrayList<GameCondition> preItems = new ArrayList<>();
         ArrayList<GameCondition> prePickedItems = new ArrayList<>();
 
-        EscapeScenarioCondition escapeScenarioConditionPostStart;
+        EscapeScenarioCondition postESC;
+        //menu condition is true
         GameCondition postLevelCond = new GameCondition(GameRooms.MENU.name(), GameCondition.State.TRUE);
         GameCondition postSelectedCond = new GameCondition();
         GameCondition postGameActCond =  new GameCondition();
@@ -40,10 +41,10 @@ public class ActionFactory {
         ArrayList<GameCondition> postUsedItems = new ArrayList<>();
         ArrayList<GameCondition> postPickedItems = new ArrayList<>();
 
-        escapeScenarioConditionPreStart = new EscapeScenarioCondition(preLevelCond, preSelectedCond, preGameActCond, preItems, prePickedItems);
-        escapeScenarioConditionPostStart = new EscapeScenarioCondition(postLevelCond, postSelectedCond, postGameActCond, postItems, postPickedItems, postUsedItems, postSubRoom);
+        preESC = new EscapeScenarioCondition(preLevelCond, preSelectedCond, preGameActCond, preItems, prePickedItems);
+        postESC = new EscapeScenarioCondition(postLevelCond, postSelectedCond, postGameActCond, postItems, postPickedItems, postUsedItems, postSubRoom);
 
-        return new UserAction("RETURN MENU", escapeScenarioConditionPreStart, escapeScenarioConditionPostStart);
+        return new UserAction("RETURN MENU", preESC, postESC);
     }
 
 
@@ -54,14 +55,15 @@ public class ActionFactory {
      * @return Start the game action that navigates from Menu -> {room, subRoom}
      */
     static UserAction createStartAction(@NotNull Enum<?> room, @NotNull GameRooms subRoom){
-        EscapeScenarioCondition escapeScenarioConditionPreStart;
+        EscapeScenarioCondition preESC;
+        //should be in menu
         GameCondition preLevelCond = new GameCondition(GameRooms.MENU.name(), GameCondition.State.TRUE);
         GameCondition preSelectedCond = new GameCondition();
         GameCondition preGameActCond =  new GameCondition();
         ArrayList<GameCondition> preItems = new ArrayList<>();
         ArrayList<GameCondition> prePickedItems = new ArrayList<>();
 
-        EscapeScenarioCondition escapeScenarioConditionPostStart;
+        EscapeScenarioCondition postESC;
         GameCondition postLevelCond = new GameCondition(room.name(), GameCondition.State.TRUE);
         GameCondition postSelectedCond = new GameCondition();
         GameCondition postGameActCond =  new GameCondition();
@@ -70,15 +72,15 @@ public class ActionFactory {
         ArrayList<GameCondition> postUsedItems = new ArrayList<>();
         GameCondition postSubRoom = new GameCondition(subRoom.name(), GameCondition.State.TRUE);
 
-        escapeScenarioConditionPreStart = new EscapeScenarioCondition(preLevelCond, preSelectedCond, preGameActCond, preItems, prePickedItems);
-        escapeScenarioConditionPostStart = new EscapeScenarioCondition(postLevelCond, postSelectedCond, postGameActCond, postItems, postPickedItems, postUsedItems, postSubRoom);
+        preESC = new EscapeScenarioCondition(preLevelCond, preSelectedCond, preGameActCond, preItems, prePickedItems);
+        postESC = new EscapeScenarioCondition(postLevelCond, postSelectedCond, postGameActCond, postItems, postPickedItems, postUsedItems, postSubRoom);
 
-        return new UserAction("START GAME", escapeScenarioConditionPreStart, escapeScenarioConditionPostStart);
+        return new UserAction("START GAME", preESC, postESC);
     }
 
 
     /**
-     * Creates a pick action of item in room, subRoom
+     * Creates a pick action of item in room, subRoom. Gets an item from room to inventory
      * @param item Item to be picked
      * @param room Room that item is in
      * @param subRoom SubRoom that item is in
@@ -86,12 +88,15 @@ public class ActionFactory {
      */
     static UserAction createPickAction (@NotNull Enum<?> item, @NotNull GameRooms room, @NotNull  GameRooms subRoom){
         EscapeScenarioCondition escapeScenarioConditionPreStart;
+        //should be in a room
         GameCondition preLevelCond = new GameCondition(room.name(), GameCondition.State.TRUE);
         GameCondition preSelectedCond = new GameCondition();
+        //action should be pick
         GameCondition preGameActCond =  new GameCondition(EscapeGameAction.Option.PICK.name(), GameCondition.State.TRUE);
         ArrayList<GameCondition> preItems = new ArrayList<>();
         ArrayList<GameCondition> prePickedItems = new ArrayList<>();
         ArrayList<GameCondition> preUsedItems = new ArrayList<>();
+        //item to be picked should not be picked, we are not checking item list as these can change when used
         prePickedItems.add( new GameCondition( item.name(), GameCondition.State.FALSE));
         GameCondition preSubRoom = new GameCondition(subRoom.name(), GameCondition.State.TRUE);
 
@@ -101,7 +106,9 @@ public class ActionFactory {
         GameCondition postGameActCond =  new GameCondition();
         ArrayList<GameCondition> postItems = new ArrayList<>();
         ArrayList<GameCondition> postPickedItems = new ArrayList<>();
+        //add to items list
         postItems.add( new GameCondition(item.name(), GameCondition.State.TRUE));
+        //add to picked items to prevent picking again
         postPickedItems.add( new GameCondition(item.name(), GameCondition.State.TRUE));
 
         escapeScenarioConditionPreStart = new EscapeScenarioCondition(preLevelCond, preSelectedCond, preGameActCond, preItems, prePickedItems, preUsedItems, preSubRoom);
@@ -112,87 +119,98 @@ public class ActionFactory {
     }
 
     /**
-     * Creates a select action of an item in room
+     * Creates a select action of an item in room, select the item in UI
      * @param item Item that can be selected
      * @param room Room that selection can happen
      * @return A selection action of item that can be used in room
      */
     static UserAction createSelectAction(@NotNull Enum<?> item, @NotNull GameRooms room){
-        EscapeScenarioCondition escapeScenarioConditionPreStart;
+        EscapeScenarioCondition preESC;
         GameCondition preLevelCond = new GameCondition(room.name(), GameCondition.State.TRUE);
+        //selection of item should be false
         GameCondition preSelectedCond = new GameCondition(item.name(), GameCondition.State.FALSE);
         GameCondition preGameActCond =  new GameCondition(EscapeGameAction.Option.PICK.name(), GameCondition.State.TRUE);
         ArrayList<GameCondition> preItems = new ArrayList<>();
+        //item should exist in items, not checking picked as combined items do not list in picked
         preItems.add( new GameCondition(item.name(), GameCondition.State.TRUE));
         ArrayList<GameCondition> prePickedItems = new ArrayList<>();
 
-        EscapeScenarioCondition escapeScenarioConditionPostStart;
+        EscapeScenarioCondition postESC;
         GameCondition postLevelCond = new GameCondition(room.name(), GameCondition.State.TRUE);
+        //set selected to true
         GameCondition postSelectedCond = new GameCondition(item.name(), GameCondition.State.TRUE);
+        //action becomes select
         GameCondition postGameActCond =  new GameCondition(EscapeGameAction.Option.SELECT.name(), GameCondition.State.TRUE);
         ArrayList<GameCondition> postItems = new ArrayList<>();
         ArrayList<GameCondition> postPickedItems = new ArrayList<>();
 
-        escapeScenarioConditionPreStart = new EscapeScenarioCondition(preLevelCond, preSelectedCond, preGameActCond, preItems, prePickedItems);
-        escapeScenarioConditionPostStart = new EscapeScenarioCondition(postLevelCond, postSelectedCond, postGameActCond, postItems, postPickedItems);
+        preESC = new EscapeScenarioCondition(preLevelCond, preSelectedCond, preGameActCond, preItems, prePickedItems);
+        postESC = new EscapeScenarioCondition(postLevelCond, postSelectedCond, postGameActCond, postItems, postPickedItems);
 
-        return new UserAction("SELECT " + item.name(), escapeScenarioConditionPreStart, escapeScenarioConditionPostStart);
+        return new UserAction("SELECT " + item.name(), preESC, postESC);
     }
 
     /**
-     * Creates a deselect action of an item in room
+     * Creates a deselect action of an item in room, deselect selected item using UI
      * @param item Item that can be deselected
      * @param room Room that deselection can happen
      * @return A deselection action of item that can be used in room
      */
     static UserAction createDeselectAction(@NotNull Enum<?> item, @NotNull GameRooms room){
-        EscapeScenarioCondition escapeScenarioConditionPreStart;
+        EscapeScenarioCondition preESC;
         GameCondition preLevelCond = new GameCondition(room.name(), GameCondition.State.TRUE);
+        //item should be selected
         GameCondition preSelectedCond = new GameCondition(item.name(), GameCondition.State.TRUE);
+        //select should be the action
         GameCondition preGameActCond =  new GameCondition(EscapeGameAction.Option.SELECT.name(), GameCondition.State.TRUE);
         ArrayList<GameCondition> preItems = new ArrayList<>();
         preItems.add( new GameCondition(item.name(), GameCondition.State.TRUE));
         ArrayList<GameCondition> prePickedItems = new ArrayList<>();
 
-        EscapeScenarioCondition escapeScenarioConditionPostStart;
+        EscapeScenarioCondition postESC;
         GameCondition postLevelCond = new GameCondition(room.name(), GameCondition.State.TRUE);
+        //deselect the item
         GameCondition postSelectedCond = new GameCondition(item.name(), GameCondition.State.FALSE);
+        //revert to pick action
         GameCondition postGameActCond =  new GameCondition(EscapeGameAction.Option.PICK.name(), GameCondition.State.TRUE);
         ArrayList<GameCondition> postItems = new ArrayList<>();
         ArrayList<GameCondition> postPickedItems = new ArrayList<>();
 
-        escapeScenarioConditionPreStart = new EscapeScenarioCondition(preLevelCond, preSelectedCond, preGameActCond, preItems, prePickedItems);
-        escapeScenarioConditionPostStart = new EscapeScenarioCondition(postLevelCond, postSelectedCond, postGameActCond, postItems, postPickedItems);
+        preESC = new EscapeScenarioCondition(preLevelCond, preSelectedCond, preGameActCond, preItems, prePickedItems);
+        postESC = new EscapeScenarioCondition(postLevelCond, postSelectedCond, postGameActCond, postItems, postPickedItems);
 
-        return new UserAction("DESELECT " + item.name(), escapeScenarioConditionPreStart, escapeScenarioConditionPostStart);
+        return new UserAction("DESELECT " + item.name(), preESC, postESC);
     }
 
     /**
-     * Creates a select exit action of an item in room
+     * Creates a select exit action of an item in room, deselect using UI
      * @param item Item that selection can be exited using UI navigation
      * @param room Room that selection exit can happen
      * @return A selection exit action of item that can be used in room
      */
     static UserAction createSelectExitAction(@NotNull Enum<?> item, @NotNull GameRooms room){
-        EscapeScenarioCondition escapeScenarioConditionPreStart;
+        EscapeScenarioCondition preESC;
         GameCondition preLevelCond = new GameCondition(room.name(), GameCondition.State.TRUE);
+        //item should be selected
         GameCondition preSelectedCond = new GameCondition(item.name(), GameCondition.State.TRUE);
+        //select should be the action
         GameCondition preGameActCond =  new GameCondition(EscapeGameAction.Option.SELECT.name(), GameCondition.State.TRUE);
         ArrayList<GameCondition> preItems = new ArrayList<>();
         preItems.add( new GameCondition(item.name(), GameCondition.State.TRUE));
         ArrayList<GameCondition> prePickedItems = new ArrayList<>();
 
-        EscapeScenarioCondition escapeScenarioConditionPostStart;
+        EscapeScenarioCondition postESC;
         GameCondition postLevelCond = new GameCondition(room.name(), GameCondition.State.TRUE);
+        //deselect the item
         GameCondition postSelectedCond = new GameCondition(item.name(), GameCondition.State.FALSE);
+        //revert to pick action
         GameCondition postGameActCond =  new GameCondition(EscapeGameAction.Option.PICK.name(), GameCondition.State.TRUE);
         ArrayList<GameCondition> postItems = new ArrayList<>();
         ArrayList<GameCondition> postPickedItems = new ArrayList<>();
 
-        escapeScenarioConditionPreStart = new EscapeScenarioCondition(preLevelCond, preSelectedCond, preGameActCond, preItems, prePickedItems);
-        escapeScenarioConditionPostStart = new EscapeScenarioCondition(postLevelCond, postSelectedCond, postGameActCond, postItems, postPickedItems);
-
-        return new UserAction("SELECT EXIT " + item.name(), escapeScenarioConditionPreStart, escapeScenarioConditionPostStart);
+        preESC = new EscapeScenarioCondition(preLevelCond, preSelectedCond, preGameActCond, preItems, prePickedItems);
+        postESC = new EscapeScenarioCondition(postLevelCond, postSelectedCond, postGameActCond, postItems, postPickedItems);
+        return new UserAction("SELECT EXIT " + item.name(), preESC, postESC);
     }
 
     /**
@@ -202,25 +220,29 @@ public class ActionFactory {
      * @return A selection use action of item that can be used in room
      */
     static UserAction createSelectUseAction(@NotNull Enum<?> item, @NotNull GameRooms room){
-        EscapeScenarioCondition escapeScenarioConditionPreStart;
+        EscapeScenarioCondition preESC;
         GameCondition preLevelCond = new GameCondition(room.name(), GameCondition.State.TRUE);
+        //item should be selected
         GameCondition preSelectedCond = new GameCondition(item.name(), GameCondition.State.TRUE);
+        //action should be select
         GameCondition preGameActCond =  new GameCondition(EscapeGameAction.Option.SELECT.name(), GameCondition.State.TRUE);
         ArrayList<GameCondition> preItems = new ArrayList<>();
+        //item should exist
         preItems.add( new GameCondition(item.name(), GameCondition.State.TRUE));
         ArrayList<GameCondition> prePickedItems = new ArrayList<>();
 
-        EscapeScenarioCondition escapeScenarioConditionPostStart;
+        EscapeScenarioCondition postESC;
         GameCondition postLevelCond = new GameCondition(room.name(), GameCondition.State.TRUE);
         GameCondition postSelectedCond = new GameCondition();
+        //change the action to use
         GameCondition postGameActCond =  new GameCondition(EscapeGameAction.Option.USE.name(), GameCondition.State.TRUE);
         ArrayList<GameCondition> postItems = new ArrayList<>();
         ArrayList<GameCondition> postPickedItems = new ArrayList<>();
 
-        escapeScenarioConditionPreStart = new EscapeScenarioCondition(preLevelCond, preSelectedCond, preGameActCond, preItems, prePickedItems);
-        escapeScenarioConditionPostStart = new EscapeScenarioCondition(postLevelCond, postSelectedCond, postGameActCond, postItems, postPickedItems);
+        preESC = new EscapeScenarioCondition(preLevelCond, preSelectedCond, preGameActCond, preItems, prePickedItems);
+        postESC = new EscapeScenarioCondition(postLevelCond, postSelectedCond, postGameActCond, postItems, postPickedItems);
 
-        return new UserAction("SELECT_USE " + item.name() , escapeScenarioConditionPreStart, escapeScenarioConditionPostStart);
+        return new UserAction("SELECT_USE " + item.name() , preESC, postESC);
     }
 
     /**
@@ -230,25 +252,28 @@ public class ActionFactory {
      * @return A selection combine action of item that can be used in room
      */
     static UserAction createSelectCombineAction(@NotNull Enum<?> item, @NotNull GameRooms room){
-        EscapeScenarioCondition escapeScenarioConditionPreStart;
+        EscapeScenarioCondition preESC;
         GameCondition preLevelCond = new GameCondition(room.name(), GameCondition.State.TRUE);
+        //item should be selected
         GameCondition preSelectedCond = new GameCondition(item.name(), GameCondition.State.TRUE);
+        //action should be select
         GameCondition preGameActCond =  new GameCondition(EscapeGameAction.Option.SELECT.name(), GameCondition.State.TRUE);
         ArrayList<GameCondition> preItems = new ArrayList<>();
         preItems.add( new GameCondition(item.name(), GameCondition.State.TRUE));
         ArrayList<GameCondition> prePickedItems = new ArrayList<>();
 
-        EscapeScenarioCondition escapeScenarioConditionPostStart;
+        EscapeScenarioCondition postESC;
         GameCondition postLevelCond = new GameCondition(room.name(), GameCondition.State.TRUE);
         GameCondition postSelectedCond = new GameCondition();
+        //change action to combine
         GameCondition postGameActCond =  new GameCondition(EscapeGameAction.Option.COMBINE.name(), GameCondition.State.TRUE);
         ArrayList<GameCondition> postItems = new ArrayList<>();
         ArrayList<GameCondition> postPickedItems = new ArrayList<>();
 
-        escapeScenarioConditionPreStart = new EscapeScenarioCondition(preLevelCond, preSelectedCond, preGameActCond, preItems, prePickedItems);
-        escapeScenarioConditionPostStart = new EscapeScenarioCondition(postLevelCond, postSelectedCond, postGameActCond, postItems, postPickedItems);
+        preESC = new EscapeScenarioCondition(preLevelCond, preSelectedCond, preGameActCond, preItems, prePickedItems);
+        postESC = new EscapeScenarioCondition(postLevelCond, postSelectedCond, postGameActCond, postItems, postPickedItems);
 
-        return new UserAction("SELECT_COMBINE " + item.name() , escapeScenarioConditionPreStart, escapeScenarioConditionPostStart);
+        return new UserAction("SELECT_COMBINE " + item.name() , preESC, postESC);
     }
 
     /**
@@ -261,29 +286,33 @@ public class ActionFactory {
      * @return A combine action that takes itemF and itemS and results in itemCombined
      */
     static UserAction createCombineAction(@NotNull Enum<?> itemF, @NotNull Enum<?> itemS, @NotNull Enum<?> itemCombined, @NotNull GameRooms room){
-        EscapeScenarioCondition escapeScenarioConditionPreStart;
+        EscapeScenarioCondition preESC;
         GameCondition preLevelCond = new GameCondition(room.name(), GameCondition.State.TRUE);
         GameCondition preSelectedCond = new GameCondition(itemF.name(), GameCondition.State.TRUE);
+        //action should be combine
         GameCondition preGameActCond =  new GameCondition(EscapeGameAction.Option.COMBINE.name(), GameCondition.State.TRUE);
         ArrayList<GameCondition> preItems = new ArrayList<>();
+        //both items should exist
         preItems.add( new GameCondition(itemF.name(), GameCondition.State.TRUE));
         preItems.add( new GameCondition(itemS.name(), GameCondition.State.TRUE));
         ArrayList<GameCondition> prePickedItems = new ArrayList<>();
 
-        EscapeScenarioCondition escapeScenarioConditionPostStart;
+        EscapeScenarioCondition postESC;
         GameCondition postLevelCond = new GameCondition(room.name(), GameCondition.State.TRUE);
         GameCondition postSelectedCond = new GameCondition();
+        //after combine occurs change the action to pick
         GameCondition postGameActCond =  new GameCondition(EscapeGameAction.Option.PICK.name(), GameCondition.State.TRUE);
         ArrayList<GameCondition> postItems = new ArrayList<>();
+        //remove both items from the list and add combination
         postItems.add( new GameCondition(itemF.name(), GameCondition.State.FALSE));
         postItems.add( new GameCondition(itemS.name(), GameCondition.State.FALSE));
         postItems.add( new GameCondition(itemCombined.name(), GameCondition.State.TRUE));
         ArrayList<GameCondition> postPickedItems = new ArrayList<>();
 
-        escapeScenarioConditionPreStart = new EscapeScenarioCondition(preLevelCond, preSelectedCond, preGameActCond, preItems, prePickedItems);
-        escapeScenarioConditionPostStart = new EscapeScenarioCondition(postLevelCond, postSelectedCond, postGameActCond, postItems, postPickedItems);
+        preESC = new EscapeScenarioCondition(preLevelCond, preSelectedCond, preGameActCond, preItems, prePickedItems);
+        postESC = new EscapeScenarioCondition(postLevelCond, postSelectedCond, postGameActCond, postItems, postPickedItems);
 
-        return new UserAction("COMBINE " + itemF.name() + " " + itemS.name() + " => " + itemCombined.name(), escapeScenarioConditionPreStart, escapeScenarioConditionPostStart);
+        return new UserAction("COMBINE " + itemF.name() + " " + itemS.name() + " => " + itemCombined.name(), preESC, postESC);
     }
 
     /**
@@ -297,8 +326,10 @@ public class ActionFactory {
         EscapeScenarioCondition preESC;
         GameCondition preLevelCond = new GameCondition(room.name(), GameCondition.State.TRUE);
         GameCondition preSelectedCond = new GameCondition(item.name(), GameCondition.State.TRUE);
+        //action is select as this is done in UI
         GameCondition preGameActCond =  new GameCondition(EscapeGameAction.Option.SELECT.name(), GameCondition.State.TRUE);
         ArrayList<GameCondition> preItems = new ArrayList<>();
+        //item to be dismantled should exist
         preItems.add( new GameCondition(item.name(), GameCondition.State.TRUE));
         ArrayList<GameCondition> prePickedItems = new ArrayList<>();
         GameCondition preSubRoomCond = new GameCondition();
@@ -309,7 +340,9 @@ public class ActionFactory {
         GameCondition postSelectedCond = new GameCondition(item.name(), GameCondition.State.FALSE);
         GameCondition postGameActCond =  new GameCondition(EscapeGameAction.Option.PICK.name(), GameCondition.State.TRUE);
         ArrayList<GameCondition> postItems = new ArrayList<>();
+        //remove the item dismantled from the list
         postItems.add( new GameCondition(item.name(), GameCondition.State.FALSE));
+        //add all of the dismantle result to item list
         for (Enum<?> dismantledItem: dismantledItems) {
             postItems.add( new GameCondition(dismantledItem.name(), GameCondition.State.TRUE));
         }
@@ -332,31 +365,35 @@ public class ActionFactory {
      * @return An action describes use action
      */
     static UserAction createUseAction(@NotNull Enum<?> item, @NotNull GameRooms room, @NotNull GameRooms subRoom){
-        EscapeScenarioCondition escapeScenarioConditionPreStart;
+        EscapeScenarioCondition preESC;
         GameCondition preLevelCond = new GameCondition(room.name(), GameCondition.State.TRUE);
         GameCondition preSelectedCond = new GameCondition(item.name(), GameCondition.State.TRUE);
+        //action should be use
         GameCondition preGameActCond =  new GameCondition(EscapeGameAction.Option.USE.name(), GameCondition.State.TRUE);
         ArrayList<GameCondition> preItems = new ArrayList<>();
+        //item should exist
         preItems.add( new GameCondition(item.name(), GameCondition.State.TRUE));
         ArrayList<GameCondition> prePickedItems = new ArrayList<>();
 
         GameCondition preSubRoomCond = new GameCondition(subRoom.name(), GameCondition.State.TRUE);
         ArrayList<GameCondition> preUsedItems = new ArrayList<>();
-        EscapeScenarioCondition escapeScenarioConditionPostStart;
+        EscapeScenarioCondition postESC;
         GameCondition postLevelCond = new GameCondition(room.name(), GameCondition.State.TRUE);
         GameCondition postSelectedCond = new GameCondition(item.name(), GameCondition.State.FALSE);
         GameCondition postGameActCond =  new GameCondition(EscapeGameAction.Option.PICK.name(), GameCondition.State.TRUE);
         ArrayList<GameCondition> postItems = new ArrayList<>();
+        //remove the item from items
         postItems.add( new GameCondition(item.name(), GameCondition.State.FALSE));
         ArrayList<GameCondition> postPickedItems = new ArrayList<>();
         GameCondition postSubRoomCond = new GameCondition();
         ArrayList<GameCondition> postUsedItems = new ArrayList<>();
+        //add to used list
         postUsedItems.add( new GameCondition(item.name(), GameCondition.State.TRUE));
 
-        escapeScenarioConditionPreStart = new EscapeScenarioCondition(preLevelCond, preSelectedCond, preGameActCond, preItems, prePickedItems, preUsedItems, preSubRoomCond);
-        escapeScenarioConditionPostStart = new EscapeScenarioCondition(postLevelCond, postSelectedCond, postGameActCond, postItems, postPickedItems, postUsedItems, postSubRoomCond);
+        preESC = new EscapeScenarioCondition(preLevelCond, preSelectedCond, preGameActCond, preItems, prePickedItems, preUsedItems, preSubRoomCond);
+        postESC = new EscapeScenarioCondition(postLevelCond, postSelectedCond, postGameActCond, postItems, postPickedItems, postUsedItems, postSubRoomCond);
 
-        return new UserAction("USE " + item.name(), escapeScenarioConditionPreStart, escapeScenarioConditionPostStart);
+        return new UserAction("USE " + item.name(), preESC, postESC);
     }
 
     /**
@@ -369,28 +406,31 @@ public class ActionFactory {
      * to another newSubRoom
      */
     static UserAction createZoomAction(@NotNull Enum<?> item, @NotNull GameRooms room, @NotNull GameRooms currentSubRoom, @NotNull GameRooms newSubRoom){
-        EscapeScenarioCondition escapeScenarioConditionPreStart;
+        EscapeScenarioCondition preESC;
         GameCondition preLevelCond = new GameCondition(room.name(), GameCondition.State.TRUE);
         GameCondition preSelectedCond = new GameCondition();
+        //action should be pick
         GameCondition preGameActCond =  new GameCondition(EscapeGameAction.Option.PICK.name(), GameCondition.State.TRUE);
         ArrayList<GameCondition> preItems = new ArrayList<>();
         ArrayList<GameCondition> prePickedItems = new ArrayList<>();
+        //current sub room requirement
         GameCondition preSubRoomCondition = new GameCondition(currentSubRoom.name(), GameCondition.State.TRUE);
         ArrayList<GameCondition> preUsedItems = new ArrayList<>();
 
-        EscapeScenarioCondition escapeScenarioConditionPostStart;
+        EscapeScenarioCondition postESC;
         GameCondition postLevelCond = new GameCondition(room.name(), GameCondition.State.TRUE);
         GameCondition postSelectedCond = new GameCondition();
         GameCondition postGameActCond =  new GameCondition();
         ArrayList<GameCondition> postItems = new ArrayList<>();
         ArrayList<GameCondition> postPickedItems = new ArrayList<>();
+        //change the sub room
         GameCondition postSubRoomCondition = new GameCondition(newSubRoom.name(), GameCondition.State.TRUE);
         ArrayList<GameCondition> postUsedItems = new ArrayList<>();
 
-        escapeScenarioConditionPreStart = new EscapeScenarioCondition(preLevelCond, preSelectedCond, preGameActCond, preItems, prePickedItems, preUsedItems, preSubRoomCondition);
-        escapeScenarioConditionPostStart = new EscapeScenarioCondition(postLevelCond, postSelectedCond, postGameActCond, postItems, postPickedItems, postUsedItems, postSubRoomCondition);
+        preESC = new EscapeScenarioCondition(preLevelCond, preSelectedCond, preGameActCond, preItems, prePickedItems, preUsedItems, preSubRoomCondition);
+        postESC = new EscapeScenarioCondition(postLevelCond, postSelectedCond, postGameActCond, postItems, postPickedItems, postUsedItems, postSubRoomCondition);
 
-        return new UserAction("ZOOM " + item.name(), escapeScenarioConditionPreStart, escapeScenarioConditionPostStart);
+        return new UserAction("ZOOM " + item.name(), preESC, postESC);
     }
 
     /**
@@ -403,27 +443,30 @@ public class ActionFactory {
      * room and subRoom
      */
     static UserAction createExitAction (@NotNull Enum<?> item, @NotNull GameRooms room, @NotNull  GameRooms subRoom){
-        EscapeScenarioCondition escapeScenarioConditionPreStart;
+        EscapeScenarioCondition preESC;
         GameCondition preLevelCond = new GameCondition(room.name(), GameCondition.State.TRUE);
         GameCondition preSelectedCond = new GameCondition();
         GameCondition preGameActCond =  new GameCondition(EscapeGameAction.Option.PICK.name(), GameCondition.State.TRUE);
         ArrayList<GameCondition> preItems = new ArrayList<>();
         ArrayList<GameCondition> prePickedItems = new ArrayList<>();
         ArrayList<GameCondition> preUsedItems = new ArrayList<>();
+        //item should exist as we are exiting using an item
         preUsedItems.add( new GameCondition( item.name(), GameCondition.State.TRUE));
+        //sub room requirement should fit
         GameCondition preSubRoom = new GameCondition(subRoom.name(), GameCondition.State.TRUE);
 
-        EscapeScenarioCondition escapeScenarioConditionPostStart;
+        EscapeScenarioCondition postESC;
+        //post condition is THE END
         GameCondition postLevelCond = new GameCondition("THE END", GameCondition.State.TRUE);
         GameCondition postSelectedCond = new GameCondition();
         GameCondition postGameActCond =  new GameCondition();
         ArrayList<GameCondition> postItems = new ArrayList<>();
         ArrayList<GameCondition> postPickedItems = new ArrayList<>();
 
-        escapeScenarioConditionPreStart = new EscapeScenarioCondition(preLevelCond, preSelectedCond, preGameActCond, preItems, prePickedItems, preUsedItems, preSubRoom);
-        escapeScenarioConditionPostStart = new EscapeScenarioCondition(postLevelCond, postSelectedCond, postGameActCond, postItems, postPickedItems);
+        preESC = new EscapeScenarioCondition(preLevelCond, preSelectedCond, preGameActCond, preItems, prePickedItems, preUsedItems, preSubRoom);
+        postESC = new EscapeScenarioCondition(postLevelCond, postSelectedCond, postGameActCond, postItems, postPickedItems);
 
-        return new UserAction("EXIT " +  item.name(), escapeScenarioConditionPreStart, escapeScenarioConditionPostStart);
+        return new UserAction("EXIT " +  item.name(), preESC, postESC);
 
     }
 
@@ -441,6 +484,7 @@ public class ActionFactory {
         GameCondition preGameActCond =  new GameCondition();
         ArrayList<GameCondition> preItems = new ArrayList<>();
         ArrayList<GameCondition> prePickedItems = new ArrayList<>();
+        //which sub rooms will display back button
         GameCondition preSubRoomCondition = new GameCondition(currentSubRoom.name(), GameCondition.State.TRUE);
         ArrayList<GameCondition> preUsedItems = new ArrayList<>();
 
@@ -450,6 +494,7 @@ public class ActionFactory {
         GameCondition postGameActCond =  new GameCondition();
         ArrayList<GameCondition> postItems = new ArrayList<>();
         ArrayList<GameCondition> postPickedItems = new ArrayList<>();
+        //change the sub room
         GameCondition postSubRoomCondition = new GameCondition(newSubRoom.name(), GameCondition.State.TRUE);
         ArrayList<GameCondition> postUsedItems = new ArrayList<>();
 
