@@ -27,6 +27,7 @@ class GameGraphGenerator {
         generate(mGraphNode);
     }
 
+    private static int count = 1;
     /**
      * Generates a graph from given gameState
      * @param graphNode GameState that the class is initialized with
@@ -35,11 +36,12 @@ class GameGraphGenerator {
         for (UserAction uAction : mAvailableUserActions) {
             GameState newGameState = graphNode.getVertex().apply(uAction);
             if ( newGameState != null){
-//                System.out.println("***************************************");
-//                System.out.println( newGameState.toString());
                 GraphNode newGraphNode = new GraphNode(uAction, newGameState);
                 if (graphNode.AddNode( newGraphNode)) {
+//                    System.out.println("***************************************");
+//                    System.out.println( newGameState.toString());
                     generate( newGraphNode);
+//                    System.out.println(count++);
                 }
             }
         }
@@ -49,7 +51,7 @@ class GameGraphGenerator {
      * TODO this method should print the graph formed by the {@link #generate()}
      */
     void print(){
-        mGraphNode.print ();
+        mGraphNode.getPaths ();
     }
 
     /**

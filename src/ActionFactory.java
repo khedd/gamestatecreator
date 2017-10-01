@@ -364,7 +364,7 @@ public class ActionFactory {
      * @param subRoom SubRoom that item can be used in
      * @return An action describes use action
      */
-    static UserAction createUseAction(@NotNull Enum<?> item, @NotNull GameRooms room, @NotNull GameRooms subRoom){
+    static UserAction createUseAction(@NotNull Enum<?> item,  Enum<?> itemCreated, @NotNull GameRooms room, @NotNull GameRooms subRoom){
         EscapeScenarioCondition preESC;
         GameCondition preLevelCond = new GameCondition(room.name(), GameCondition.State.TRUE);
         GameCondition preSelectedCond = new GameCondition(item.name(), GameCondition.State.TRUE);
@@ -387,13 +387,21 @@ public class ActionFactory {
         ArrayList<GameCondition> postPickedItems = new ArrayList<>();
         GameCondition postSubRoomCond = new GameCondition();
         ArrayList<GameCondition> postUsedItems = new ArrayList<>();
+
         //add to used list
-        postUsedItems.add( new GameCondition(item.name(), GameCondition.State.TRUE));
+        //if there is an item created add it to the items
+        String name  ="USE " + item.name();
+        if ( itemCreated != null){
+            name += " => " + itemCreated.name();
+            postUsedItems.add(  new GameCondition(itemCreated.name(), GameCondition.State.TRUE));
+        }else{
+            postUsedItems.add( new GameCondition(item.name(), GameCondition.State.TRUE));
+        }
 
         preESC = new EscapeScenarioCondition(preLevelCond, preSelectedCond, preGameActCond, preItems, prePickedItems, preUsedItems, preSubRoomCond);
         postESC = new EscapeScenarioCondition(postLevelCond, postSelectedCond, postGameActCond, postItems, postPickedItems, postUsedItems, postSubRoomCond);
 
-        return new UserAction("USE " + item.name(), preESC, postESC);
+        return new UserAction(name, preESC, postESC);
     }
 
     /**

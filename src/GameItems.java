@@ -3,6 +3,6 @@
  */
 class GameItems {
     enum FirstRoom {
-        MAKE_UP, DOOR_HANDLE, SCREW, COMBINED_DOOR_HANDLE, TV
+        MAKE_UP, DOOR_HANDLE, SCREW, COMBINED_DOOR_HANDLE, TV, USED_COMBINED_DOOR_HANDLE
     }
 }

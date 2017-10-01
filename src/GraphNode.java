@@ -5,15 +5,25 @@ import java.util.ArrayList;
  */
 public class GraphNode {
 
+    private static class CycleData{
+        private enum Type { NONE, START, END};
+        private int  id;
+        private Type type;
+
+        CycleData (int id, Type type){
+            this.id = id;
+            this.type = type;
+        }
+    }
+
+    private ArrayList<CycleData> mCycleList;
     private UserAction mEdge;
     private GameState mVertex;
     private GraphNode mParent;
-    private ArrayList<GraphNode> mNodes;
-    /**
-     * Pruned nodes
-     */
-    private ArrayList<GraphNode> mForbiddenNodes;
 
+    private ArrayList<GraphNode> mNodes;
+
+    private static int CYCLE_ID = 0;
     /**
      * Creates a Node containing an edge to this node and vertex of this node
      * @param edge String value for the edge
@@ -24,11 +34,10 @@ public class GraphNode {
         mVertex = vertex;
         mParent = null;
         mNodes = new ArrayList<>();
-
-
+        mCycleList = new ArrayList<>();
     }
     /**
-     * Adds nodes to the current node, sets the paret
+     * Adds nodes to the current node, sets the parent
      * @param node Connected nodes
      * @return If the node is rejected for any reason such as creating a cycle the returns false
      * if the node is added return true
@@ -50,14 +59,30 @@ public class GraphNode {
         ArrayList<UserAction> names = new ArrayList<>();
         checkCycleParentHelperGetNames ( names);
 
-        int cycleLength = checkCycle( names);
+        int cycleStartEnd[] = new int[2];
+        int cycleLength = checkCycle( names, cycleStartEnd);
         if ( cycleLength != 0){
+
+            markCycle ( this, cycleStartEnd);
             pruneParentCycleFromGraph(this, cycleLength);
             return true;
         }else
         {
-            return names.size() >= 15;
+            return names.size() >= 16;
         }
+    }
+
+    private void markCycle(GraphNode node, int[] cycleStartEnd) {
+        GraphNode parent = node;
+        for (int i = 0; i < cycleStartEnd[0]; i++) {
+            parent = parent.mParent;
+        }
+        parent.mCycleList.add( new CycleData(CYCLE_ID, CycleData.Type.END));
+        for (int i = cycleStartEnd[0]; i < cycleStartEnd[1]; i++) {
+            parent = parent.mParent;
+        }
+        parent.mCycleList.add( new CycleData(CYCLE_ID, CycleData.Type.START));
+        CYCLE_ID++;
     }
 
     /**
@@ -78,9 +103,10 @@ public class GraphNode {
     /**
      * Checks the user actions name to find whether it includes a cycle
      * @param userActions edges, user actions in child to parent order
+     * @param cycleStartEnd 2element array first element has the start, second has the end
      * @return True if there is cycle false if not
      */
-    private int checkCycle ( ArrayList<UserAction> userActions){
+    private int checkCycle ( ArrayList<UserAction> userActions, int cycleStartEnd[]){
         ArrayList<UserAction> cycle = new ArrayList<>();
         //a cycle must have at least three elements in this game
         if ( userActions.size() > 3) {
@@ -92,8 +118,12 @@ public class GraphNode {
                         hasCycle = false;
                     }
                 }
-                if (hasCycle)
-                    return cycle.size();
+                if (hasCycle) {
+                    int cycleSize = cycle.size();
+                    cycleStartEnd[0] = cycleSize;
+                    cycleStartEnd[1] = cycleSize * 2 - 1;
+                    return cycleSize;
+                }
                 cycle.add(userActions.get(i));
                 //there is no cycle if cycle to be checked is greater than half of the list
                 if ( cycle.size() * 2 > userActions.size()){
@@ -156,6 +186,111 @@ public class GraphNode {
     }
 
     /**
+     * Gets all available paths from the starting node
+
+     */
+    public void getPaths (){
+        ArrayList<ArrayList<SimplifiedNode>> paths = new ArrayList<>();
+        getPaths( this, paths, null, 0);
+        //convert paths to string array
+
+        for ( ArrayList<SimplifiedNode> path: paths){
+            ArrayList<String> strings = simplifiedToString( path);
+            if ( checkIfExits(strings))
+            {
+                System.out.println("**************************************");
+                for (String s : strings) {
+                    System.out.println(s);
+                }
+            }
+
+        }
+//            if ( checkIfExits(path))
+//            {
+//                System.out.println("**************************************");
+//                for (String node : path) {
+//                    System.out.println(node);
+//                }
+//            }
+//        }
+//        return null;
+    }
+
+    /**
+     * Check if the last element is the EXIT
+     * @param path
+     * @return
+     */
+    private boolean checkIfExits ( ArrayList<String> path){
+        if ( path.isEmpty())
+            return false;
+
+        int idx = path.size() - 1;
+        return path.get(idx).startsWith("EXIT");
+    }
+
+
+
+    private void getPaths (GraphNode root, ArrayList<ArrayList<SimplifiedNode>> paths,
+                           ArrayList<SimplifiedNode> currentPath, int depth){
+
+        //manage the path
+        if ( currentPath == null){
+            currentPath = new ArrayList<>();
+        }else{
+            if ( currentPath.size() > depth) {
+                ArrayList<SimplifiedNode> newPath = new ArrayList<>();
+                for (int i = 0; i < depth; i++) {
+                    newPath.add( new SimplifiedNode( currentPath.get(i)));
+                }
+                currentPath = newPath;
+            }
+//                currentPath.subList(depth, currentPath.size()).clear();
+        }
+        //add current node
+        currentPath.add( root.toSimplifiedNode());
+        depth++;
+
+        if ( root.mNodes.isEmpty()){
+            paths.add( currentPath);
+        }else{
+            for (GraphNode graphNode : root.mNodes) {
+                getPaths(graphNode, paths, currentPath, depth);
+            }
+        }
+
+
+    }
+
+    private ArrayList<String> simplifiedToString ( ArrayList<SimplifiedNode> simplifiedNodes){
+        ArrayList<String> strings = new ArrayList<>();
+        for (int i = 0; i < simplifiedNodes.size(); i++) {
+            SimplifiedNode simplifiedNode = simplifiedNodes.get(i);
+
+            if ( simplifiedNode.mType == CycleData.Type.NONE) {
+                for (int j = i + 1; j < simplifiedNodes.size(); j++) {
+                    SimplifiedNode endCycleNode = simplifiedNodes.get(j);
+                    if (endCycleNode.existsCycleId(simplifiedNode.mCycleList)) {
+                        simplifiedNode.mVerifiedCycle = true;
+                        simplifiedNode.mType = CycleData.Type.START;
+
+                        endCycleNode.mVerifiedCycle = true;
+                        endCycleNode.mType = CycleData.Type.END;
+                        break;
+                    }
+                }
+            }
+            strings.add( simplifiedNodes.get(i).toString());
+//            boolean isCycleStart
+//            for (int j = i + 1; j < simplifiedNodes.size(); j++) {
+//
+//
+//            }
+        }
+        return strings;
+    }
+
+    /**
      * @return String representation of class
      */
     @Override
@@ -165,4 +300,81 @@ public class GraphNode {
         else
             return mVertex.toString();
     }
+
+    private SimplifiedNode toSimplifiedNode (){
+        SimplifiedNode simplifiedNode   = new SimplifiedNode();
+        simplifiedNode.mCycleList       = mCycleList;
+
+        if ( mEdge != null){
+            simplifiedNode.mName = mEdge.getAction();
+        }else {
+            simplifiedNode.mName = "";
+        }
+////        return toString();
+//        String string = "";
+//        if ( mCycle == CYCLE.END){
+//            string += "</CYCLE" + Arrays.toString( mCycleList.toArray()) + ">";
+//        }
+//        if ( mCycle == CYCLE.START){
+//            string += "<CYCLE" + Arrays.toString( mCycleList.toArray()) + ">";
+//        }
+//        if ( mEdge != null)
+//            string += mEdge.getAction();// + "\n" + mVertex.get();
+////        else
+////            return mVertex.toString();
+        return simplifiedNode;
+    }
+
+    private static class SimplifiedNode {
+        private ArrayList<CycleData>    mCycleList;
+        private String                  mName;
+        boolean                         mVerifiedCycle = false;
+        CycleData.Type                  mType = CycleData.Type.NONE;
+
+        SimplifiedNode (){
+            mCycleList      = new ArrayList<>();
+            mName           = "";
+            mVerifiedCycle  = false;
+            mType           = CycleData.Type.NONE;
+        }
+
+        SimplifiedNode(SimplifiedNode simplifiedNode) {
+            mCycleList = simplifiedNode.mCycleList;
+            mName      = simplifiedNode.mName;
+            mVerifiedCycle = simplifiedNode.mVerifiedCycle;
+            mType           = simplifiedNode.mType;
+        }
+
+        boolean existsCycleId ( ArrayList<CycleData> cycleIds){
+            for (CycleData otherCycleData : cycleIds) {
+                //if type is start search for the id with END
+                if ( otherCycleData.type == CycleData.Type.START){
+                    for ( CycleData ourCycleData: mCycleList){
+                        if ( ourCycleData.type == CycleData.Type.END && ourCycleData.id == otherCycleData.id){
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public String toString() {
+            String string = "";
+            if ( mVerifiedCycle && mType == CycleData.Type.START){
+                string += "<CYCLE>";
+            }
+            string += mName;
+            if ( mVerifiedCycle && mType == CycleData.Type.END){
+                string += "</CYCLE>";
+            }
+//            String aString = "";
+//            for (CycleData data: mCycleList){
+//                aString += data.id + " ";
+//            }
+            return string;
+        }
+    }
+
 }
