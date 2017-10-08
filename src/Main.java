@@ -1,4 +1,4 @@
-import java.util.EnumSet;
+import java.util.ArrayList;
 
 /**
  * Main entry pint of project GameStateCreator
@@ -10,12 +10,22 @@ import java.util.EnumSet;
 class Main {
 
     /**
-     * Main method calls {@link #createTests()}
+     * Main method calls {@link #generate()}
      * @param args Not used
      */
     public static void main(String[] args){
         System.out.println("Game State Creator");
-        createTests();
+        GameGraphGenerator gameGraphGenerator = generate();
+
+        ArrayList<String> startSeq = new ArrayList<>();
+        startSeq.add("START GAME");
+        startSeq.add("PICK DOOR_HANDLE");
+        startSeq.add("ZOOM TV");
+
+        gameGraphGenerator.playSequence(startSeq);
+
+        gameGraphGenerator.generate();
+        gameGraphGenerator.print();
 
     }
 
@@ -24,7 +34,8 @@ class Main {
      * Creates a test case from
      * {@link ActionFactory#createMenuAction()} not active as it causes loops
      */
-    private static void createTests(){
+    private static GameGraphGenerator generate(){
+
 
         GameState menuState = GameState.fromMenu();
         GameGraphGenerator gameGraphGenerator = new GameGraphGenerator(menuState);
@@ -67,8 +78,7 @@ class Main {
 
         gameGraphGenerator.addUserAction( ActionFactory.createMenuAction());
 
-        gameGraphGenerator.generate();
-        gameGraphGenerator.print();
+        return gameGraphGenerator;
     }
 
 

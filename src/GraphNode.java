@@ -301,6 +301,14 @@ public class GraphNode {
             return mVertex.toString();
     }
 
+    /**
+     * converts the node to the simplified string, used to compare actions
+     * @return simplified representation
+     */
+    public String toSimplifiedString (){
+        return toSimplifiedNode().toString();
+    }
+
     private SimplifiedNode toSimplifiedNode (){
         SimplifiedNode simplifiedNode   = new SimplifiedNode();
         simplifiedNode.mCycleList       = mCycleList;
