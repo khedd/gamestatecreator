@@ -191,6 +191,34 @@ class EscapeScenarioCondition extends ScenarioCondition{
         return combined;
     }
 
+    public ArrayList<GameCondition> getPickedItems() {
+        return mPickedItems;
+    }
+
+    public ArrayList<GameCondition> getItems() {
+        return mItems;
+    }
+
+    public ArrayList<GameCondition> getUsedItems() {
+        return mUsedItems;
+    }
+
+    public GameCondition getSelected() {
+        return mSelected;
+    }
+
+    public GameCondition getLevel() {
+        return mLevel;
+    }
+
+    public GameCondition getGameAction() {
+        return mGameAction;
+    }
+
+    public GameCondition getSubRoom() {
+        return mSubRoom;
+    }
+
     /**
      * Converts to string representation
      * @return String representation

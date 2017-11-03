@@ -70,6 +70,14 @@ class GameGraphGenerator {
         mAvailableUserActions.add(userAction);
     }
 
+
+    /**
+     * Returns the all available user actions for this game
+     * @return User Actions
+     */
+    ArrayList<UserAction> getUserActions (){
+        return  mAvailableUserActions;
+    }
     /**
      *
      * @param startSeq initializes the graph from given sequence

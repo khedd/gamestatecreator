@@ -17,6 +17,8 @@ class Main {
         System.out.println("Game State Creator");
         GameGraphGenerator gameGraphGenerator = generate();
 
+        StateBinarization stateBinarization = new StateBinarization( gameGraphGenerator.getUserActions());
+
         ArrayList<String> startSeq = new ArrayList<>();
         startSeq.add("START GAME");
         startSeq.add("PICK DOOR_HANDLE");
