@@ -10,11 +10,12 @@ import java.util.ArrayList;
 class Main {
 
     /**
-     * Main method calls {@link #initializeGraphActions()}
+     * Main method calls {@link #initializeGraphActions(StateBinarization)}
      * @param args Not used
      */
     public static void main(String[] args){
-        binarization ();
+//        binarization ();
+        example ();
     }
 
     private static ArrayList<String> getRooms (){
@@ -46,8 +47,15 @@ class Main {
     }
 
     private static void example (){
+        StateBinarization stateBinarization = new StateBinarization();
+        stateBinarization.addActions( getActions());
+        stateBinarization.addItems( getItems());
+        stateBinarization.addRooms( getRooms());
+        stateBinarization.addSubRooms( getSubRooms());
+        stateBinarization.generate ();
+
         System.out.println("Game State Creator");
-        GameGraphGenerator gameGraphGenerator = initializeGraphActions();
+        BinarizedGameGraphGenerator gameGraphGenerator = initializeGraphActions( stateBinarization);
 
         ArrayList<String> startSeq = new ArrayList<>();
         startSeq.add("START GAME");
@@ -68,7 +76,7 @@ class Main {
         stateBinarization.addSubRooms( getSubRooms());
         stateBinarization.generate ();
 
-        GameGraphGenerator gameGraphGenerator = initializeGraphActions();
+        BinarizedGameGraphGenerator gameGraphGenerator = initializeGraphActions( stateBinarization);
 
         GameState menuState = GameState.fromMenu();
 
@@ -109,11 +117,11 @@ class Main {
      * Creates a test case from
      * {@link ActionFactory#createMenuAction()} not active as it causes loops
      */
-    private static GameGraphGenerator initializeGraphActions(){
+    private static BinarizedGameGraphGenerator initializeGraphActions(StateBinarization stateBinarization){
 
 
-        GameState menuState = GameState.fromMenu();
-        GameGraphGenerator gameGraphGenerator = new GameGraphGenerator(menuState);
+        BinarizedGameState menuState = BinarizedGameState.fromMenu(stateBinarization);
+        BinarizedGameGraphGenerator gameGraphGenerator = new BinarizedGameGraphGenerator(menuState, stateBinarization);
 
         gameGraphGenerator.addUserAction( ActionFactory.createStartAction(GameRooms.FIRST_ROOM, GameRooms.LIVING_ROOM));
 
