@@ -68,4 +68,12 @@ class GameState {
     public String toString() {
         return mCurrentCondition.toString();
     }
+
+    /**
+     * EscapeScenarioCondition property
+     * @return EscapeScenarioCondition representing the state
+     */
+    public EscapeScenarioCondition getCondition() {
+        return mCurrentCondition;
+    }
 }

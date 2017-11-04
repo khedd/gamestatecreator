@@ -10,14 +10,16 @@ import java.util.ArrayList;
 class Main {
 
     /**
-     * Main method calls {@link #generate()}
+     * Main method calls {@link #initializeGraphActions()}
      * @param args Not used
      */
     public static void main(String[] args){
-        System.out.println("Game State Creator");
-        GameGraphGenerator gameGraphGenerator = generate();
+        binarization ();
+    }
 
-        StateBinarization stateBinarization = new StateBinarization( gameGraphGenerator.getUserActions());
+    private static void example (){
+        System.out.println("Game State Creator");
+        GameGraphGenerator gameGraphGenerator = initializeGraphActions();
 
         ArrayList<String> startSeq = new ArrayList<>();
         startSeq.add("START GAME");
@@ -28,15 +30,36 @@ class Main {
 
         gameGraphGenerator.generate();
         gameGraphGenerator.print();
-
     }
 
+    private static void binarization (){
+        System.out.println("Game State Creator");
+        GameGraphGenerator gameGraphGenerator = initializeGraphActions();
+
+        StateBinarization stateBinarization = new StateBinarization( gameGraphGenerator.getUserActions());
+
+        GameState menuState = GameState.fromMenu();
+        System.out.println( menuState.toString());
+
+        UserAction startAction = ActionFactory.createStartAction(GameRooms.FIRST_ROOM, GameRooms.LIVING_ROOM);
+        GameState nextState = menuState.apply( startAction);
+        System.out.println( nextState.toString());
+
+        {
+            long binary = stateBinarization.binarize(menuState.getCondition());
+            System.out.println("Binary: " + binary);
+        }
+        {
+            long binary = stateBinarization.binarize(nextState.getCondition());
+            System.out.println("Binary: " + binary);
+        }
+    }
 
     /**
      * Creates a test case from
      * {@link ActionFactory#createMenuAction()} not active as it causes loops
      */
-    private static GameGraphGenerator generate(){
+    private static GameGraphGenerator initializeGraphActions(){
 
 
         GameState menuState = GameState.fromMenu();
