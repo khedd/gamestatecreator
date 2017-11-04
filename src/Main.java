@@ -39,19 +39,26 @@ class Main {
         StateBinarization stateBinarization = new StateBinarization( gameGraphGenerator.getUserActions());
 
         GameState menuState = GameState.fromMenu();
-        System.out.println( menuState.toString());
+
 
         UserAction startAction = ActionFactory.createStartAction(GameRooms.FIRST_ROOM, GameRooms.LIVING_ROOM);
         GameState nextState = menuState.apply( startAction);
-        System.out.println( nextState.toString());
+
 
         {
+            System.out.println( "*******************");
+            System.out.println( menuState.toString());
             long binary = stateBinarization.binarize(menuState.getCondition());
             System.out.println("Binary: " + binary);
+            System.out.println( stateBinarization.debinarize( binary));
         }
         {
+            System.out.println( "*******************");
+            System.out.println( nextState.toString());
             long binary = stateBinarization.binarize(nextState.getCondition());
             System.out.println("Binary: " + binary);
+            System.out.println( stateBinarization.debinarize( binary));
+
         }
     }
 

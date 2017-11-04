@@ -12,37 +12,12 @@ public class StateBinarization {
      * Holds property value with its list of usable `thing of property` in the game
      * Inner HashMap holds the index for the name of {@link GameCondition}
      */
-    final private HashMap<PROPERTY, HashMap<String, Integer>> mPropertyValues = new HashMap<>();
-    //TODO why hold a separate
-//    /**
-//     * list of all rooms available actions in the game
-//     */
-//    final private HashMap<String, Integer> mActions = ;
-//    /**
-//     * list of all rooms available in the game
-//     */
-//    final private HashMap<String, Integer> mRooms;
-//    /**
-//     * list of all sub rooms in the game
-//     */
-//    final private HashMap<String, Integer> mSubRooms;
-//    /**
-//     * list of all items in the game
-//     */
-//    final private HashMap<String, Integer> mItems;
-//    /**
-//     * list of all selectable items in the game
-//     */
-//    final private HashMap<String, Integer> mSelectedItems;
-//    /**
-//     * list of all usable items in the game
-//     */
-//    final private HashMap<String, Integer> mUsedItems;
-//    /**
-//     * list of all pickable items in the game
-//     */
-//    final private HashMap<String, Integer> mPickedItems;
+    final private HashMap<PROPERTY, HashMap<String, Long>> mPropertyValues = new HashMap<>();
 
+    /**
+     * TODO naming
+     */
+    final private HashMap<PROPERTY, HashMap<Long, String>> mPropertyReverseValues = new HashMap<>();
     /**
      * Holds the order for properties in which they are added to bitmap
      */
@@ -53,7 +28,7 @@ public class StateBinarization {
      * SUBROOM -> 2
      * ...
      */
-    final private HashMap<PROPERTY, Integer> mPropertyBitStart = new HashMap<>();
+    final private HashMap<PROPERTY, Long> mPropertyBitStart = new HashMap<>();
 
     /**
      * Holds the bit count for the properties eg
@@ -61,7 +36,7 @@ public class StateBinarization {
      * SUBROOM -> 2
      * ...
      */
-    final private HashMap<PROPERTY, Integer> mPropertyBitCount = new HashMap<>();
+    final private HashMap<PROPERTY, Long> mPropertyBitCount = new HashMap<>();
 
     /**
      * holds which {@link PROPERTY} are mapped with which {@link METHOD}
@@ -97,14 +72,25 @@ public class StateBinarization {
         mPropertyOrder.add( PROPERTY.ROOM);
     }
 
+    /**
+     * initializes each entry in mPropertyValues
+     */
     private void initializePropertyValues() {
-        mPropertyValues.put(PROPERTY.PICKED_ITEMS, new HashMap<String, Integer>());
-        mPropertyValues.put(PROPERTY.ITEMS, new HashMap<String, Integer>());
-        mPropertyValues.put(PROPERTY.USED_ITEMS, new HashMap<String, Integer>());
-        mPropertyValues.put(PROPERTY.GAME_ACTION, new HashMap<String, Integer>());
-        mPropertyValues.put(PROPERTY.SELECTED, new HashMap<String, Integer>());
-        mPropertyValues.put(PROPERTY.ROOM, new HashMap<String, Integer>());
-        mPropertyValues.put(PROPERTY.SUBROOM, new HashMap<String, Integer>());
+        mPropertyValues.put(PROPERTY.PICKED_ITEMS, new HashMap<String, Long>());
+        mPropertyValues.put(PROPERTY.ITEMS, new HashMap<String, Long>());
+        mPropertyValues.put(PROPERTY.USED_ITEMS, new HashMap<String, Long>());
+        mPropertyValues.put(PROPERTY.GAME_ACTION, new HashMap<String, Long>());
+        mPropertyValues.put(PROPERTY.SELECTED, new HashMap<String, Long>());
+        mPropertyValues.put(PROPERTY.ROOM, new HashMap<String, Long>());
+        mPropertyValues.put(PROPERTY.SUBROOM, new HashMap<String, Long>());
+
+        mPropertyReverseValues.put(PROPERTY.PICKED_ITEMS, new HashMap<Long, String>());
+        mPropertyReverseValues.put(PROPERTY.ITEMS, new HashMap<Long, String>());
+        mPropertyReverseValues.put(PROPERTY.USED_ITEMS, new HashMap<Long, String>());
+        mPropertyReverseValues.put(PROPERTY.GAME_ACTION, new HashMap<Long, String>());
+        mPropertyReverseValues.put(PROPERTY.SELECTED, new HashMap<Long, String>());
+        mPropertyReverseValues.put(PROPERTY.ROOM, new HashMap<Long, String>());
+        mPropertyReverseValues.put(PROPERTY.SUBROOM, new HashMap<Long, String>());
     }
 
     /**
@@ -125,9 +111,9 @@ public class StateBinarization {
      * Calculates how many bits are required for a property
      */
     private void calculate() {
-        int cumulativeStartIdx = 0;
+        long cumulativeStartIdx = 0;
         for (PROPERTY property: mPropertyOrder){
-            int count = calculateBitCount( property);
+            long count = calculateBitCount( property);
             mPropertyBitStart.put(property, cumulativeStartIdx);
             mPropertyBitCount.put(property, count);
             cumulativeStartIdx += count;
@@ -139,8 +125,8 @@ public class StateBinarization {
      * @param property Property of game condition
      * @return number of bits to represent the property
      */
-    private int calculateBitCount(PROPERTY property) {
-        int size = mPropertyValues.get( property).size();
+    private long calculateBitCount(PROPERTY property) {
+        long size = mPropertyValues.get( property).size();
         METHOD method = mMethod.get( property);
         switch ( method) {
             case BIT:
@@ -154,11 +140,11 @@ public class StateBinarization {
 
     /**
      * calculates bit count of a number
-     * @param count integer number noting number of states
+     * @param count long number noting number of states
      * @return how many bits can represent that number
      */
-    private int calculateCount(int count){
-        return (int) Math.ceil( log2nlz( count));
+    private long calculateCount(long count){
+        return (long) Math.ceil( log2nlz( count));
     }
 
     /**
@@ -167,11 +153,11 @@ public class StateBinarization {
      * @param bits Number
      * @return log2 bits
      */
-    private static int log2nlz( int bits )
+    private static long log2nlz( long bits )
     {
         if( bits == 0 )
             return 0; // or throw exception
-        return 32 - Integer.numberOfLeadingZeros( bits );
+        return 64 - Long.numberOfLeadingZeros( bits );
     }
 
     /**
@@ -216,8 +202,8 @@ public class StateBinarization {
      * @return Binarized game condition with respect to its property by counting method
      */
     private long binarizeCount(PROPERTY property, GameCondition condition) {
-        int shiftAmount = mPropertyBitStart.get( property);
-        int value = mPropertyValues.get(property).get( condition.getName());
+        long shiftAmount = mPropertyBitStart.get( property);
+        long value = mPropertyValues.get(property).get( condition.getName());
         //shift amount to map to correct property location
         return value << shiftAmount;
     }
@@ -229,8 +215,8 @@ public class StateBinarization {
      * @return Binarized game condition with respect to its property by bit method
      */
     private long binarizeBit(PROPERTY property, GameCondition condition) {
-        int shiftAmount = mPropertyBitStart.get( property);
-        int value = mPropertyValues.get(property).get( condition.getName());
+        long shiftAmount = mPropertyBitStart.get( property);
+        long value = mPropertyValues.get(property).get( condition.getName());
         //shift it with value as ever gameCondition wil take a bit and its index is its
         //bit that will hold
         //also with shift amount to map to correct property location
@@ -238,8 +224,14 @@ public class StateBinarization {
     }
 
 
+    /**
+     * Binarizes the given condition that belongs to a certain property by bit method
+     * @param property Property of game condition
+     * @param conditions Game conditions to be binarized
+     * @return Binarized game condition with respect to its property by bit method
+     */
     private long binarize(PROPERTY property, ArrayList<GameCondition> conditions) {
-        int binarization = 0;
+        long binarization = 0;
         for (GameCondition gameCondition: conditions){
             binarization |= binarize(property, gameCondition);
         }
@@ -249,13 +241,13 @@ public class StateBinarization {
      * converts binary to its {@link EscapeScenarioCondition} equivalent
      * @param binary binary representation
      * @return EscapeScenarioCondition representation
+     * TODO done by hand method is not used
      */
     EscapeScenarioCondition debinarize(long binary){
-        //TODO
         GameCondition roomCond      = debinarizeSingle(PROPERTY.ROOM, binary);
-        GameCondition subRoomCond   = debinarizeSingle(PROPERTY.ROOM, binary);
-        GameCondition actionCond    = debinarizeSingle(PROPERTY.ROOM, binary);
-        GameCondition selectedCond  = debinarizeSingle(PROPERTY.ROOM, binary);
+        GameCondition subRoomCond   = debinarizeSingle(PROPERTY.SUBROOM, binary);
+        GameCondition actionCond    = debinarizeSingle(PROPERTY.GAME_ACTION, binary);
+        GameCondition selectedCond  = debinarizeSingle(PROPERTY.SELECTED, binary);
 
         ArrayList<GameCondition> usedCondition  = debinarizeMultiple(PROPERTY.USED_ITEMS, binary);
         ArrayList<GameCondition> pickedCond     = debinarizeMultiple(PROPERTY.PICKED_ITEMS, binary);
@@ -266,12 +258,51 @@ public class StateBinarization {
         return escapeScenarioCondition;
     }
 
+    /**
+     *
+     * @param property
+     * @param binary
+     * @return
+     */
     private GameCondition debinarizeSingle(PROPERTY property, long binary) {
-        return null;
+        //create a mask
+        long bitCount = mPropertyBitCount.get( property);
+        long shiftAmount = mPropertyBitStart.get( property);
+        //shift 1 with bit count and subtract one to get a local mask
+        //eg if bit mask is 3; 1 << 3 = 1000; 1000 - 1 = 111
+        long mask = ((1 << bitCount) - 1);
+        long binaryShifted = binary >> shiftAmount;
+        long propertyBinary = mask & binaryShifted;
+        //need to get property
+        return debinarizeProperty (property, propertyBinary);
     }
 
+    /**
+     *
+     * @param property
+     * @param propertyBinary
+     * @return
+     */
+    private GameCondition debinarizeProperty(PROPERTY property, long propertyBinary) {
+        HashMap<Long, String> hashMap = mPropertyReverseValues.get( property);
+        String name = hashMap.get( propertyBinary);
+        if ( name.isEmpty()){
+            return new GameCondition();
+        }else{
+            return new GameCondition( name, GameCondition.State.TRUE);
+        }
+
+    }
+
+    /**
+     *
+     * @param property
+     * @param binary
+     * @return
+     */
     private ArrayList<GameCondition> debinarizeMultiple(PROPERTY property, long binary) {
-        return null;
+        ArrayList<GameCondition> gameConditions = new ArrayList<>();
+        return gameConditions;
     }
 
     /**
@@ -318,12 +349,17 @@ public class StateBinarization {
      * process property to get its HashMap from mPropertyValues and add to it
      * @param property Property of game condition
      * @param gameCondition {@link GameCondition}
+     * TODO naming
      */
     private void process(PROPERTY property, GameCondition gameCondition) {
-        HashMap<String, Integer> hashMap = mPropertyValues.get( property);
+        HashMap<String, Long> hashMap = mPropertyValues.get( property);
+        HashMap<Long, String> reverseHashMap = mPropertyReverseValues.get( property);
         //do not insert if it already exists
-        if ( !hashMap.containsKey( gameCondition.getName()))
-            hashMap.put( gameCondition.getName(), hashMap.size());
+        if ( !hashMap.containsKey( gameCondition.getName())) {
+            long size = hashMap.size();
+            hashMap.put(gameCondition.getName(), size);
+            reverseHashMap.put( size, gameCondition.getName());
+        }
     }
 
     /**
