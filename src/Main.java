@@ -17,6 +17,34 @@ class Main {
         binarization ();
     }
 
+    private static ArrayList<String> getRooms (){
+        ArrayList<String> rooms = new ArrayList<>();
+        rooms.add( "MENU");
+        rooms.add( "FIRST_ROOM");
+        rooms.add( "THE END");
+        return rooms;
+    }
+    private static ArrayList<String> getActions (){
+        ArrayList<String> actions = new ArrayList<>();
+        for ( EscapeGameAction.Option option:  EscapeGameAction.Option.values()){
+            actions.add( option.name());
+        }
+        return actions;
+    }
+    private static ArrayList<String> getSubRooms (){
+        ArrayList<String> subRooms = new ArrayList<>();
+        subRooms.add( "LIVING_ROOM");
+        subRooms.add( "TV_ROOM");
+        return subRooms;
+    }
+    private static ArrayList<String> getItems() {
+        ArrayList<String> items = new ArrayList<>();
+        for ( GameItems.FirstRoom item:  GameItems.FirstRoom.values()){
+            items.add( item.name());
+        }
+        return items;
+    }
+
     private static void example (){
         System.out.println("Game State Creator");
         GameGraphGenerator gameGraphGenerator = initializeGraphActions();
@@ -33,16 +61,20 @@ class Main {
     }
 
     private static void binarization (){
-        System.out.println("Game State Creator");
-        GameGraphGenerator gameGraphGenerator = initializeGraphActions();
+        StateBinarization stateBinarization = new StateBinarization();
+        stateBinarization.addActions( getActions());
+        stateBinarization.addItems( getItems());
+        stateBinarization.addRooms( getRooms());
+        stateBinarization.addSubRooms( getSubRooms());
+        stateBinarization.generate ();
 
-        StateBinarization stateBinarization = new StateBinarization( gameGraphGenerator.getUserActions());
+        GameGraphGenerator gameGraphGenerator = initializeGraphActions();
 
         GameState menuState = GameState.fromMenu();
 
-
         UserAction startAction = ActionFactory.createStartAction(GameRooms.FIRST_ROOM, GameRooms.LIVING_ROOM);
         GameState nextState = menuState.apply( startAction);
+        UserAction pickAction = ActionFactory.createPickAction(GameItems.FirstRoom.DOOR_HANDLE, GameRooms.FIRST_ROOM, GameRooms.LIVING_ROOM);
 
 
         {
@@ -60,7 +92,18 @@ class Main {
             System.out.println( stateBinarization.debinarize( binary));
 
         }
+        {
+            nextState = nextState.apply( pickAction);
+            System.out.println( "*******************");
+            System.out.println( nextState.toString());
+            long binary = stateBinarization.binarize(nextState.getCondition());
+            System.out.println("Binary: " + binary);
+            System.out.println( stateBinarization.debinarize( binary));
+
+        }
     }
+
+
 
     /**
      * Creates a test case from

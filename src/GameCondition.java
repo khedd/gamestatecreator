@@ -1,3 +1,4 @@
+import java.util.HashMap;
 import java.util.Objects;
 
 /**
@@ -77,6 +78,25 @@ class GameCondition {
             mState = gameCondition.mState;
         }
 
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof GameCondition))
+            return false;
+        if (obj == this)
+            return true;
+
+
+        GameCondition rhs = (GameCondition) obj;
+        if ( rhs.mState != mState)
+            return false;
+        return rhs.mName.compareTo(mName) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return toString().hashCode();
     }
 
     /**
