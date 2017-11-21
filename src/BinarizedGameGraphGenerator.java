@@ -12,6 +12,8 @@ class BinarizedGameGraphGenerator {
     private BinarizedGraphNode mGraphNode;
     private BinarizedGraphNode mGraphStartNode;
     private StateBinarization mStateBinarization;
+    private final GameGraph<Long> mGameGraph = new GameGraph<>();
+
 
     /**
      * Initializes with given game state
@@ -44,23 +46,31 @@ class BinarizedGameGraphGenerator {
      * @param binarizedGraphNode GameState that the class is initialized with
      */
     private void generate (BinarizedGraphNode binarizedGraphNode){
-        for (UserAction uAction : mAvailableUserActions) {
-            BinarizedGameState newGameState = binarizedGraphNode.getVertex().apply(mStateBinarization, uAction);
-            if ( newGameState != null){
-                BinarizedGraphNode newGraphNode = new BinarizedGraphNode(uAction.getAction(), newGameState);
+        mGameGraph.addNode( binarizedGraphNode.getVertex().getCondition());
 
-                if (binarizedGraphNode.AddNode( newGraphNode)) {
-                    generate( newGraphNode);
+        while ( mGameGraph.hasNext ()){
+            Long node = mGameGraph.getNext();
+            ArrayList<GameGraph.GameGraphNode<Long>> nodes = new ArrayList<>();
+            BinarizedGameState bgs = new BinarizedGameState( node);
+            for (UserAction uAction : mAvailableUserActions) {
+                BinarizedGameState gs = bgs.apply( mStateBinarization, uAction);
+                if ( gs != null){
+                    GameGraph.GameGraphNode<Long> gameGraphNode = new GameGraph.GameGraphNode<>();
+                    gameGraphNode.node = gs.getCondition();
+                    gameGraphNode.action = uAction.getAction();
+                    nodes.add( gameGraphNode);
                 }
             }
+            mGameGraph.addChildren( node, nodes);
         }
+        mGameGraph.print ();
     }
 
     /**
      * TODO this method should print the graph formed by the {@link #generate()}
      */
     void print(){
-        mGraphNode.getPaths ();
+
 //        mGraphNode.print();
     }
 
@@ -80,43 +90,5 @@ class BinarizedGameGraphGenerator {
      */
     ArrayList<UserAction> getUserActions (){
         return  mAvailableUserActions;
-    }
-    /**
-     *
-     * @param startSeq initializes the graph from given sequence
-     *                 also used to test whether sequence is valid
-     * @return how many of the sequence is done
-     */
-    public int playSequence(ArrayList<String> startSeq) {
-        BinarizedGraphNode node = mGraphStartNode;
-        int seqCounter = 0;
-        for (String seq: startSeq) {
-            BinarizedGraphNode testNode = testCurrSeq(node, seq);
-            if ( testNode == null){
-                return seqCounter;
-            }else{
-                node.AddNode( testNode);
-                node = testNode;
-                seqCounter++;
-            }
-
-        }
-        //shift the start node so that generation will begin after this node
-        mGraphStartNode = node;
-        return seqCounter;
-    }
-
-
-    private BinarizedGraphNode testCurrSeq (BinarizedGraphNode graphNode, String currSeq){
-        for (UserAction uAction : mAvailableUserActions) {
-            BinarizedGameState newGameState = graphNode.getVertex().apply(mStateBinarization, uAction);
-            if ( newGameState != null){
-                BinarizedGraphNode newGraphNode = new BinarizedGraphNode(uAction.getAction(), newGameState);
-                if ( newGraphNode.toSimplifiedString().compareTo( currSeq) == 0){
-                    return  newGraphNode;
-                }
-            }
-        }
-        return null;
     }
 }

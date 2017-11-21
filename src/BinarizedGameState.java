@@ -17,7 +17,7 @@ class BinarizedGameState {
      * Creates a new GameState using the {@link EscapeScenarioCondition}
      * @param binary escapeScenarioCondition of the game
      */
-    private BinarizedGameState(long binary) {
+    public BinarizedGameState(long binary) {
         mCurrentCondition = binary;
     }
 
