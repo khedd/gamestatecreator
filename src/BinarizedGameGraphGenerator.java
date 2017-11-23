@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * Generates a GraphNode from given rules {@link UserAction} and initial {@link GameState}
@@ -69,16 +70,19 @@ class BinarizedGameGraphGenerator {
     /**
      * TODO this method should print the graph formed by the {@link #generate()}
      */
-    void print(){
-
-//        mGraphNode.print();
+    void print() {
+        Set<Long> states = mGameGraph.getVertices();
+        for (Long state : states) {
+            System.out.println( state);
+//            System.out.println(mStateBinarization.debinarize(state).toString());
+        }
     }
 
-    /**
-     * Adds the given user action to the GameGraphGenerator
-     * Used to fork new states from graph node
-     * @param userAction User action such as {start game, pick an item, return to menu}
-     */
+        /**
+         * Adds the given user action to the GameGraphGenerator
+         * Used to fork new states from graph node
+         * @param userAction User action such as {start game, pick an item, return to menu}
+         */
     void addUserAction(UserAction userAction){
         mAvailableUserActions.add(userAction);
     }

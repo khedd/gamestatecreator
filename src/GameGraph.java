@@ -58,4 +58,8 @@ public class GameGraph<T> {
         }
     }
 
+    public Set<T> getVertices (){
+        return mGraph.keySet();
+    }
+
 }
