@@ -15,7 +15,6 @@ import java.util.Set;
  * TODO does not generate a graph, just prints visited nodes
  */
 public class GameGraphGenerator {
-    private final BinarizedGameState mInitialGameState;
     private final ArrayList<UserAction> mAvailableUserActions;
 
     private GameGraph.GameGraphNode<Long> mGraphNode;
@@ -29,15 +28,13 @@ public class GameGraphGenerator {
     /**
      * Initializes with given game state
      * @param initialGameState Starting point of the graph
+     * @param availableUserActions
      */
-    public GameGraphGenerator(BinarizedGameState initialGameState, StateBinarization stateBinarization){
-        mInitialGameState = initialGameState;
+    public GameGraphGenerator(BinarizedGameState initialGameState, StateBinarization stateBinarization, ArrayList<UserAction> availableUserActions){
         mStateBinarization = stateBinarization;
         mAvailableUserActions = new ArrayList<>();
-        mGraphStartNode = new GameGraph.GameGraphNode<>();
-        mGraphStartNode.vertex = initialGameState.getCondition();
-//        mGraphNode = new BinarizedGraphNode(null, mInitialGameState);
-//        mGraphStartNode = mGraphNode;
+        mGraphStartNode = new GameGraph.GameGraphNode<>(initialGameState.getCondition());
+        mAvailableUserActions.addAll( availableUserActions);
     }
 
     /**
@@ -68,9 +65,7 @@ public class GameGraphGenerator {
             for (UserAction uAction : mAvailableUserActions) {
                 BinarizedGameState gs = bgs.apply( mStateBinarization, uAction);
                 if ( gs != null){
-                    GameGraph.GameGraphNode<Long> gameGraphNode = new GameGraph.GameGraphNode<>();
-                    gameGraphNode.vertex = gs.getCondition(); // aka state
-                    gameGraphNode.edge = uAction.getAction();
+                    GameGraph.GameGraphNode<Long> gameGraphNode = new GameGraph.GameGraphNode<>(gs.getCondition(), uAction.getAction());
                     nodes.add( gameGraphNode);
                 }
             }
@@ -90,17 +85,6 @@ public class GameGraphGenerator {
         }
 //        mGraphNode.print();
     }
-
-    /**
-     * Adds the given user edge to the {@link GameGraphGenerator}
-     * Used to fork new states from graph vertex
-     * @param userAction User edge such as {start game, pick an item, return to menu}
-     */
-    public void addUserAction(UserAction userAction){
-        mAvailableUserActions.add(userAction);
-    }
-
-
     /**
      * Returns the all available user actions for this game
      * @return User Actions

@@ -9,14 +9,24 @@ import java.util.*;
 public class GameGraph<T> {
 
 
-    public static class GameGraphNode<T>{
+    static class GameGraphNode<T>{
         T vertex; /// vertex
         String edge; /// edge
+
+        GameGraphNode(T vertex) {
+            this.vertex = vertex;
+            edge = "";
+        }
+
+        GameGraphNode(T vertex, String edge) {
+            this.vertex = vertex;
+            this.edge = edge;
+        }
     }
     final HashMap<T, ArrayList< GameGraphNode<T>>> mGraph = new HashMap<>(); ///adjacency list
-    final Queue<T> mUnExplored = new LinkedList<>();
+    private final Queue<T> mUnExplored = new LinkedList<>();
 
-    public boolean addNode ( T node){
+    boolean addNode(T node){
         if (mGraph.containsKey( node)){
             return false;
         }else {
@@ -27,7 +37,7 @@ public class GameGraph<T> {
     }
 
 
-    public boolean addChildren ( T node,  ArrayList< GameGraphNode<T>> children){
+    void addChildren(T node, ArrayList<GameGraphNode<T>> children){
         if ( mGraph.containsKey( node)) {
 //            ArrayList<GameGraphNode<T>> entry = mGraph.get(vertex);
             mGraph.put( node, children);
@@ -35,21 +45,19 @@ public class GameGraph<T> {
             for ( GameGraphNode<T> ggn: children){
                 addNode( ggn.vertex);
             }
-            return true;
         }
-        return false;
     }
 
-    public T getNext (){
+    T getNext(){
         if ( mUnExplored.isEmpty())
             return null;
         return mUnExplored.peek();
     }
-    public boolean hasNext (){
+    boolean hasNext(){
         return  !( mUnExplored.isEmpty());
     }
 
-    public void print() {
+    void print() {
         System.out.println( mGraph.size());
     }
 
@@ -65,7 +73,7 @@ public class GameGraph<T> {
     }
 
 
-    public Set<T> getVertices (){
+    Set<T> getVertices(){
         return mGraph.keySet();
     }
 
