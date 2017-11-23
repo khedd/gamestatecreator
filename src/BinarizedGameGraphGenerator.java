@@ -56,7 +56,7 @@ class BinarizedGameGraphGenerator {
                 BinarizedGameState gs = bgs.apply( mStateBinarization, uAction);
                 if ( gs != null){
                     GameGraph.GameGraphNode<Long> gameGraphNode = new GameGraph.GameGraphNode<>();
-                    gameGraphNode.node = gs.getCondition();
+                    gameGraphNode.node = gs.getCondition(); // aka state
                     gameGraphNode.action = uAction.getAction();
                     nodes.add( gameGraphNode);
                 }
