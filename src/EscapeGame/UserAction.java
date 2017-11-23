@@ -1,20 +1,36 @@
+package EscapeGame;
+
+import EscapeGame.EscapeScenarioCondition;
+
 /**
  * Denotes the actions in the game, each action requires certain pre state in the game
  * and every action causes a state change in the game state.
  * {@link EscapeScenarioCondition} class is used to achieve this.
  */
-class UserAction {
+public class UserAction extends Game.UserAction{
 
-    final EscapeScenarioCondition mPreCondition;
-    final EscapeScenarioCondition mPostCondition;
+    final private EscapeScenarioCondition mPreCondition;
+    final private EscapeScenarioCondition mPostCondition;
     @SuppressWarnings({"FieldCanBeLocal", "unused"})
     private final String mName;
 
-    UserAction (String name, EscapeScenarioCondition preCondition, EscapeScenarioCondition postCondition){
+    public UserAction (String name, EscapeScenarioCondition preCondition, EscapeScenarioCondition postCondition){
         mName = name;
         mPreCondition = preCondition;
         mPostCondition = postCondition;
     }
+
+    public EscapeScenarioCondition getPreCondition() {
+        return mPreCondition;
+    }
+
+    public EscapeScenarioCondition getPostCondition() {
+        return mPostCondition;
+    }
+
+//    public String getName() {
+//        return mName;
+//    }
 
     /**
      * String representation of the class
@@ -29,7 +45,7 @@ class UserAction {
      * Gets the name of the Action
      * @return Name of the action
      */
-    String getAction() {
+    public String getAction() {
         return mName;
     }
 }

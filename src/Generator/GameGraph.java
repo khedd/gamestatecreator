@@ -1,3 +1,8 @@
+package Generator;
+
+import EscapeGame.EscapeScenarioCondition;
+import EscapeGame.StateBinarization;
+
 import java.util.*;
 
 //graph is hold as an adjacency list
@@ -5,8 +10,8 @@ public class GameGraph<T> {
 
 
     public static class GameGraphNode<T>{
-        T node; /// vertex
-        String action; /// edge
+        T vertex; /// vertex
+        String edge; /// edge
     }
     final HashMap<T, ArrayList< GameGraphNode<T>>> mGraph = new HashMap<>(); ///adjacency list
     final Queue<T> mUnExplored = new LinkedList<>();
@@ -24,11 +29,11 @@ public class GameGraph<T> {
 
     public boolean addChildren ( T node,  ArrayList< GameGraphNode<T>> children){
         if ( mGraph.containsKey( node)) {
-//            ArrayList<GameGraphNode<T>> entry = mGraph.get(node);
+//            ArrayList<GameGraphNode<T>> entry = mGraph.get(vertex);
             mGraph.put( node, children);
             mUnExplored.remove( node);
             for ( GameGraphNode<T> ggn: children){
-                addNode( ggn.node);
+                addNode( ggn.vertex);
             }
             return true;
         }

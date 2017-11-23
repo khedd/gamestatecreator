@@ -1,3 +1,10 @@
+package Generator;
+
+import EscapeGame.BinarizedGameState;
+import EscapeGame.GameState;
+import EscapeGame.StateBinarization;
+import EscapeGame.UserAction;
+
 import java.util.ArrayList;
 
 /**
@@ -6,11 +13,14 @@ import java.util.ArrayList;
  * For a game optimally all states should converge to one state Exit
  * TODO does not generate a graph, just prints visited nodes
  */
-class BinarizedGameGraphGenerator {
+public class GameGraphGenerator {
     private final BinarizedGameState mInitialGameState;
     private final ArrayList<UserAction> mAvailableUserActions;
-    private BinarizedGraphNode mGraphNode;
-    private BinarizedGraphNode mGraphStartNode;
+
+    private GameGraph.GameGraphNode<Long> mGraphNode;
+    private GameGraph.GameGraphNode<Long> mGraphStartNode;
+//    private BinarizedGraphNode mGraphNode;
+//    private BinarizedGraphNode mGraphStartNode;
     private StateBinarization mStateBinarization;
     private final GameGraph<Long> mGameGraph = new GameGraph<>();
 
@@ -19,34 +29,36 @@ class BinarizedGameGraphGenerator {
      * Initializes with given game state
      * @param initialGameState Starting point of the graph
      */
-    BinarizedGameGraphGenerator(BinarizedGameState initialGameState, StateBinarization stateBinarization){
+    public GameGraphGenerator(BinarizedGameState initialGameState, StateBinarization stateBinarization){
         mInitialGameState = initialGameState;
         mStateBinarization = stateBinarization;
         mAvailableUserActions = new ArrayList<>();
-        mGraphNode = new BinarizedGraphNode(null, mInitialGameState);
-        mGraphStartNode = mGraphNode;
+        mGraphStartNode = new GameGraph.GameGraphNode<>();
+        mGraphStartNode.vertex = initialGameState.getCondition();
+//        mGraphNode = new BinarizedGraphNode(null, mInitialGameState);
+//        mGraphStartNode = mGraphNode;
     }
 
     /**
      * reset the head of graph
      */
-    void reset (){
+    public void reset (){
         mGraphStartNode = mGraphNode;
     }
 
     /**
-     * Generates the GameGraphGenerator from given state
+     * Generates the {@link GameGraphGenerator} from given state
      */
-    void generate(){
+    public void generate(){
         generate(mGraphStartNode);
     }
 
     /**
      * Generates a graph from given gameState
-     * @param binarizedGraphNode GameState that the class is initialized with
+     * @param graphNode EscapeGame.GameState that the class is initialized with
      */
-    private void generate (BinarizedGraphNode binarizedGraphNode){
-        mGameGraph.addNode( binarizedGraphNode.getVertex().getCondition());
+    private void generate (GameGraph.GameGraphNode<Long> graphNode){
+        mGameGraph.addNode( graphNode.vertex);
 
         while ( mGameGraph.hasNext ()){
             Long node = mGameGraph.getNext();
@@ -56,8 +68,8 @@ class BinarizedGameGraphGenerator {
                 BinarizedGameState gs = bgs.apply( mStateBinarization, uAction);
                 if ( gs != null){
                     GameGraph.GameGraphNode<Long> gameGraphNode = new GameGraph.GameGraphNode<>();
-                    gameGraphNode.node = gs.getCondition(); // aka state
-                    gameGraphNode.action = uAction.getAction();
+                    gameGraphNode.vertex = gs.getCondition(); // aka state
+                    gameGraphNode.edge = uAction.getAction();
                     nodes.add( gameGraphNode);
                 }
             }
@@ -69,17 +81,17 @@ class BinarizedGameGraphGenerator {
     /**
      * TODO this method should print the graph formed by the {@link #generate()}
      */
-    void print(){
+    public void print(){
 
 //        mGraphNode.print();
     }
 
     /**
-     * Adds the given user action to the GameGraphGenerator
-     * Used to fork new states from graph node
-     * @param userAction User action such as {start game, pick an item, return to menu}
+     * Adds the given user edge to the {@link GameGraphGenerator}
+     * Used to fork new states from graph vertex
+     * @param userAction User edge such as {start game, pick an item, return to menu}
      */
-    void addUserAction(UserAction userAction){
+    public void addUserAction(UserAction userAction){
         mAvailableUserActions.add(userAction);
     }
 

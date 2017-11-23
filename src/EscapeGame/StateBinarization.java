@@ -1,13 +1,18 @@
+package EscapeGame;
+
+import EscapeGame.EscapeScenarioCondition;
+import EscapeGame.GameCondition;
+import EscapeGame.GameState;
+
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Used to binarize state\ this class collects information from all user actions to better subdivide
  * state to binary
  * TODO naming or reverse
  */
-class StateBinarization {
+public class StateBinarization {
     /**
      * Holds property value with its list of usable `thing of property` in the game
      * Inner HashMap holds the index for the {@link GameCondition}
@@ -62,24 +67,10 @@ class StateBinarization {
     final private ArrayList<String> mSubRooms = new ArrayList<>();
 
     /**
-     * Creates a way for binarization of {@link GameState} from intelligently
-     * calculating a simple conversion
-     * @param userActions Available actions in the game
-     */
-    @Deprecated
-    StateBinarization ( ArrayList<UserAction> userActions){
-        initializePropertyMethod();
-        initializePropertyValues ();
-        initializePropertyOrder ();
-        process(userActions);
-        calculate ();
-    }
-
-    /**
      * Initializes an empty Binarization call addRooms, addItems, addSubRooms
      * addActions then call generate to fill the hash for binarization
      */
-    StateBinarization (){
+    public StateBinarization (){
         initializePropertyMethod();
         initializePropertyValues ();
         initializePropertyOrder ();
@@ -89,7 +80,7 @@ class StateBinarization {
      * Adds available rooms
      * @param rooms Game Rooms
      */
-    void addRooms ( ArrayList<String> rooms){
+    public void addRooms ( ArrayList<String> rooms){
         mRooms.addAll( rooms);
     }
 
@@ -97,7 +88,7 @@ class StateBinarization {
      * Adds available items
      * @param items Game Items
      */
-    void addItems ( ArrayList<String> items){
+    public void addItems ( ArrayList<String> items){
         mItems.addAll( items);
     }
 
@@ -105,7 +96,7 @@ class StateBinarization {
      * Adds available subRooms
      * @param subRooms Game SubRooms
      */
-    void addSubRooms (ArrayList<String> subRooms){
+    public void addSubRooms (ArrayList<String> subRooms){
         mSubRooms.addAll( subRooms);
     }
 
@@ -113,7 +104,7 @@ class StateBinarization {
      * Adds available actions
      * @param actions Game Actions
      */
-    void addActions (ArrayList<String> actions){
+    public void addActions (ArrayList<String> actions){
         mActions.addAll( actions);
     }
 
@@ -121,7 +112,7 @@ class StateBinarization {
      * Generates possible GameConditions from Rooms, SubRooms, Actions and Items
      * Call this after they are all set
      */
-    void generate (){
+    public void generate (){
         generate ( PROPERTY.ITEMS, mItems);
         generate ( PROPERTY.PICKED_ITEMS, mItems);
         generate ( PROPERTY.USED_ITEMS, mItems);
@@ -281,7 +272,7 @@ class StateBinarization {
      * @param escapeScenarioCondition {@link EscapeScenarioCondition} of {@link GameState}
      * @return Binary representation
      */
-    long binarize ( EscapeScenarioCondition escapeScenarioCondition){
+    public long binarize ( EscapeScenarioCondition escapeScenarioCondition){
 
         long roomBinary     = binarize( PROPERTY.ROOM, escapeScenarioCondition.getLevel());
         long subRoomBinary  = binarize( PROPERTY.SUBROOM, escapeScenarioCondition.getSubRoom());
@@ -356,10 +347,10 @@ class StateBinarization {
     /**
      * converts binary to its {@link EscapeScenarioCondition} equivalent
      * @param binary binary representation
-     * @return EscapeScenarioCondition representation
+     * @return EscapeGame.EscapeScenarioCondition representation
      * TODO done by hand method is not used
      */
-    EscapeScenarioCondition debinarize(long binary){
+    public EscapeScenarioCondition debinarize(long binary){
         GameCondition roomCond      = debinarizeSingle(PROPERTY.ROOM, binary);
         GameCondition subRoomCond   = debinarizeSingle(PROPERTY.SUBROOM, binary);
         GameCondition actionCond    = debinarizeSingle(PROPERTY.GAME_ACTION, binary);
@@ -376,7 +367,7 @@ class StateBinarization {
     /**
      * @param property Property to debinarized from the binary
      * @param binary Binary representation of the property
-     * @return GameCondition extracted from the property
+     * @return EscapeGame.GameCondition extracted from the property
      */
     private GameCondition debinarizeSingle(PROPERTY property, long binary) {
         //create a mask
@@ -394,7 +385,7 @@ class StateBinarization {
     /**
      * @param property Property to debinarized from the binary
      * @param propertyBinary Masked Binary representation of the property
-     * @return GameCondition extracted from the property
+     * @return EscapeGame.GameCondition extracted from the property
      */
     private GameCondition debinarizeProperty(PROPERTY property, long propertyBinary) {
         HashMap<Long, GameCondition> hashMap = mPropertyReverseValues.get( property);
@@ -427,26 +418,6 @@ class StateBinarization {
             }
         }
         return gameConditions;
-    }
-
-    /**
-     * processes user actions to find unique properties
-     */
-    @Deprecated
-    private void process (ArrayList<UserAction> userActions){
-        for (UserAction userAction: userActions) {
-            process( userAction);
-        }
-    }
-
-    /**
-     * Processes {@link UserAction} to find unique properties
-     * @param userAction {@link UserAction}
-     */
-    @Deprecated
-    private void process(UserAction userAction) {
-        process( userAction.mPreCondition);
-        process( userAction.mPostCondition);
     }
 
     /**

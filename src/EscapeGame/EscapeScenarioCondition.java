@@ -1,3 +1,5 @@
+package EscapeGame;
+
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -10,7 +12,7 @@ import java.util.Objects;
  *  - in {@link #apply(EscapeScenarioCondition)} if current selection is false it os converted to
  *  {@link GameCondition#GameCondition()} default constructor
  */
-class EscapeScenarioCondition extends ScenarioCondition{
+public class EscapeScenarioCondition {
 
     private ArrayList<GameCondition> mPickedItems;
     private ArrayList<GameCondition> mItems;
@@ -29,7 +31,7 @@ class EscapeScenarioCondition extends ScenarioCondition{
      * @param pickedItems what are the picked items of the user or what will be the picked items of the user
      * @param items what are the items of the user or what will be the items of the user
      */
-    EscapeScenarioCondition ( GameCondition level, GameCondition selected, GameCondition gameAction,
+    public EscapeScenarioCondition ( GameCondition level, GameCondition selected, GameCondition gameAction,
                               ArrayList<GameCondition> items, ArrayList<GameCondition> pickedItems){
 
         mLevel          = level;
@@ -52,7 +54,7 @@ class EscapeScenarioCondition extends ScenarioCondition{
      * @param pickedItems what are the picked items of the user or what will be the picked items of the user
      * @param items what are the items of the user or what will be the items of the user
      */
-    EscapeScenarioCondition ( GameCondition level, GameCondition selected, GameCondition gameAction,
+    public EscapeScenarioCondition ( GameCondition level, GameCondition selected, GameCondition gameAction,
                               ArrayList<GameCondition> items, ArrayList<GameCondition> pickedItems,
                               ArrayList<GameCondition> usedItems, GameCondition subRoom){
 
@@ -69,7 +71,7 @@ class EscapeScenarioCondition extends ScenarioCondition{
      * Copy constructor using deep copy
      * @param escapeScenarioCondition Another instance
      */
-    EscapeScenarioCondition ( EscapeScenarioCondition escapeScenarioCondition){
+    public EscapeScenarioCondition ( EscapeScenarioCondition escapeScenarioCondition){
         mGameAction = escapeScenarioCondition.mGameAction;
         for ( GameCondition gameCondition: escapeScenarioCondition.mPickedItems){
             mPickedItems.add( new GameCondition( gameCondition));
@@ -92,7 +94,7 @@ class EscapeScenarioCondition extends ScenarioCondition{
      * @param mPreCondition Pre condition to be compared
      * @return if mPreCondition is subset of current condition returns true else false
      */
-    boolean compare(EscapeScenarioCondition mPreCondition) {
+    public boolean compare(EscapeScenarioCondition mPreCondition) {
         boolean status;
         status =  mGameAction.compare(mPreCondition.mGameAction);
         status &= mLevel.compare( mPreCondition.mLevel);
@@ -143,7 +145,7 @@ class EscapeScenarioCondition extends ScenarioCondition{
      * @param mPostCondition Post condition that will shape this condition
      * @return A new condition which is superset of two conditions
      */
-    EscapeScenarioCondition apply(EscapeScenarioCondition mPostCondition) {
+    public EscapeScenarioCondition apply(EscapeScenarioCondition mPostCondition) {
         GameCondition selected = mSelected.apply ( mPostCondition.mSelected);
         //check selected for false
         if ( selected.getState() == GameCondition.State.FALSE)
@@ -160,7 +162,7 @@ class EscapeScenarioCondition extends ScenarioCondition{
 
     /**
      * Combines given two lists of {@link GameCondition}. If only one of the lists contains an element that element
-     * is added else other game condition is added after the result of {@link GameCondition#apply(GameCondition)}
+     * is added else other game condition is added after the result of {@link GameCondition#apply(Game.Condition)}
      * first list is copied to another list and apply method is called on copies
      * TODO use requires element to disappear so a condition like FALSE will be applied to TRUE however apply does not handle
      * @param first Our current list

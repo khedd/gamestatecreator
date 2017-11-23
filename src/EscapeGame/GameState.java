@@ -1,3 +1,5 @@
+package EscapeGame;
+
 import java.util.ArrayList;
 
 /**
@@ -10,11 +12,11 @@ import java.util.ArrayList;
  *
  * TODO compare game states to find same states
  */
-class GameState {
+public class GameState {
     private final EscapeScenarioCondition mCurrentCondition;
 
     /**
-     * Creates a new GameState using the {@link EscapeScenarioCondition}
+     * Creates a new EscapeGame.GameState using the {@link EscapeScenarioCondition}
      * @param escapeScenarioCondition Current condition of the game
      */
     private GameState(EscapeScenarioCondition escapeScenarioCondition) {
@@ -22,18 +24,18 @@ class GameState {
     }
 
     /**
-     * Creates a new GameState that starts from the Menu with
+     * Creates a new EscapeGame.GameState that starts from the Menu with
      *  - Level is MENU
      *  - Nothing is selected
      *  - Action is PICK
      *  - No picked items
      *  - No items
-     * @return GameState that fulfills the above condition
+     * @return EscapeGame.GameState that fulfills the above condition
      */
-    static GameState fromMenu(){
-        GameCondition levelMenu = new GameCondition("MENU", GameCondition.State.TRUE);
+    public static GameState fromMenu(){
+        GameCondition levelMenu = new GameCondition(AvailableRooms.MENU.name(), GameCondition.State.TRUE);
         GameCondition selectedMenu = new GameCondition("", GameCondition.State.FALSE);
-        GameCondition gameAction = new GameCondition(EscapeGameAction.Option.PICK.name(), GameCondition.State.TRUE);
+        GameCondition gameAction = new GameCondition(AvailableActions.Option.PICK.name(), GameCondition.State.TRUE);
         ArrayList<GameCondition> pickedItems = new ArrayList<>();
         ArrayList<GameCondition> items = new ArrayList<>();
 
@@ -46,19 +48,19 @@ class GameState {
      * @param gameState Another game state
      */
     @SuppressWarnings("unused")
-    GameState (GameState gameState){
+    public GameState (GameState gameState){
         mCurrentCondition = new EscapeScenarioCondition(gameState.mCurrentCondition);
     }
 
     /**
-     * Creates a new GameState after applying user action
+     * Creates a new EscapeGame.GameState after applying user action
      * @param userAction {@link UserAction} checks if {@link UserAction#mPreCondition} holds
      *                                     and applies {@link UserAction#mPostCondition}
      * @return null if preCondition is not applicable else a new game state of applies PostCondition
      */
-    GameState apply ( UserAction userAction){
-        if (mCurrentCondition.compare ( userAction.mPreCondition)){
-            EscapeScenarioCondition newCondition = mCurrentCondition.apply( userAction.mPostCondition);
+    public GameState apply ( UserAction userAction){
+        if (mCurrentCondition.compare ( userAction.getPreCondition())){
+            EscapeScenarioCondition newCondition = mCurrentCondition.apply( userAction.getPostCondition());
             return new GameState( newCondition);
         }else
             return null;
@@ -70,8 +72,8 @@ class GameState {
     }
 
     /**
-     * EscapeScenarioCondition property
-     * @return EscapeScenarioCondition representing the state
+     * EscapeGame.EscapeScenarioCondition property
+     * @return EscapeGame.EscapeScenarioCondition representing the state
      */
     public EscapeScenarioCondition getCondition() {
         return mCurrentCondition;
