@@ -1,4 +1,7 @@
 import EscapeGame.*;
+import ExampleEscapeGame.ActionFactory;
+import ExampleEscapeGame.Available;
+import ExampleEscapeGame.Available.Levels;
 import Generator.GameGraphGenerator;
 
 import java.util.ArrayList;
@@ -18,33 +21,33 @@ class Main {
      * @param args Not used
      */
     public static void main(String[] args){
-//        binarization ();
         example ();
     }
 
     private static ArrayList<String> getRooms (){
         ArrayList<String> rooms = new ArrayList<>();
-        rooms.add( "MENU");
-        rooms.add( "FIRST_ROOM");
-        rooms.add( "THE END");
+        for ( Levels.Main option:  Available.Levels.Main.values()){
+            rooms.add( option.name());
+        }
         return rooms;
     }
     private static ArrayList<String> getActions (){
         ArrayList<String> actions = new ArrayList<>();
-        for ( AvailableActions.Option option:  AvailableActions.Option.values()){
+        for ( Available.Actions option:  Available.Actions.values()){
             actions.add( option.name());
         }
         return actions;
     }
     private static ArrayList<String> getSubRooms (){
         ArrayList<String> subRooms = new ArrayList<>();
-        subRooms.add( "LIVING_ROOM");
-        subRooms.add( "TV_ROOM");
+        for ( Levels.First option:  Available.Levels.First.values()){
+            subRooms.add( option.name());
+        }
         return subRooms;
     }
     private static ArrayList<String> getItems() {
         ArrayList<String> items = new ArrayList<>();
-        for ( AvailableItems.FirstRoom item:  AvailableItems.FirstRoom.values()){
+        for ( Available.Items.First item:  Available.Items.First.values()){
             items.add( item.name());
         }
         return items;
@@ -58,57 +61,11 @@ class Main {
         stateBinarization.addSubRooms( getSubRooms());
         stateBinarization.generate ();
 
-        System.out.println("Game State Creator");
         GameGraphGenerator gameGraphGenerator = initializeGraphActions( stateBinarization);
 
         gameGraphGenerator.generate();
         gameGraphGenerator.print();
     }
-
-    private static void binarization (){
-        StateBinarization stateBinarization = new StateBinarization();
-        stateBinarization.addActions( getActions());
-        stateBinarization.addItems( getItems());
-        stateBinarization.addRooms( getRooms());
-        stateBinarization.addSubRooms( getSubRooms());
-        stateBinarization.generate ();
-
-        GameGraphGenerator gameGraphGenerator = initializeGraphActions( stateBinarization);
-
-        GameState menuState = GameState.fromMenu();
-
-        UserAction startAction = ActionFactory.createStartAction(AvailableRooms.FIRST_ROOM, AvailableRooms.LIVING_ROOM);
-        GameState nextState = menuState.apply( startAction);
-        UserAction pickAction = ActionFactory.createPickAction(AvailableItems.FirstRoom.DOOR_HANDLE, AvailableRooms.FIRST_ROOM, AvailableRooms.LIVING_ROOM);
-
-
-        {
-            System.out.println( "*******************");
-            System.out.println( menuState.toString());
-            long binary = stateBinarization.binarize(menuState.getCondition());
-            System.out.println("Binary: " + binary);
-            System.out.println( stateBinarization.debinarize( binary));
-        }
-        {
-            System.out.println( "*******************");
-            System.out.println( nextState.toString());
-            long binary = stateBinarization.binarize(nextState.getCondition());
-            System.out.println("Binary: " + binary);
-            System.out.println( stateBinarization.debinarize( binary));
-
-        }
-        {
-            nextState = nextState.apply( pickAction);
-            System.out.println( "*******************");
-            System.out.println( nextState.toString());
-            long binary = stateBinarization.binarize(nextState.getCondition());
-            System.out.println("Binary: " + binary);
-            System.out.println( stateBinarization.debinarize( binary));
-
-        }
-    }
-
-
 
     /**
      * Creates a test case from
@@ -120,41 +77,41 @@ class Main {
         BinarizedGameState menuState = new BinarizedGameState( BinarizedGameState.fromMenu(stateBinarization));
         GameGraphGenerator gameGraphGenerator = new GameGraphGenerator(menuState, stateBinarization);
 
-        gameGraphGenerator.addUserAction( ActionFactory.createStartAction(AvailableRooms.FIRST_ROOM, AvailableRooms.LIVING_ROOM));
+        gameGraphGenerator.addUserAction( ActionFactory.createStartAction(Available.Levels.Main.FIRST_ROOM, Available.Levels.First.LIVING_ROOM));
+//
+        gameGraphGenerator.addUserAction( ActionFactory.createPickAction(Available.Items.First.MAKE_UP, Available.Levels.Main.FIRST_ROOM, Available.Levels.First.LIVING_ROOM));
+        gameGraphGenerator.addUserAction( ActionFactory.createSelectAction(Available.Items.First.MAKE_UP, Available.Levels.Main.FIRST_ROOM));
+        gameGraphGenerator.addUserAction( ActionFactory.createDeselectAction(Available.Items.First.MAKE_UP, Available.Levels.Main.FIRST_ROOM));
+        gameGraphGenerator.addUserAction( ActionFactory.createSelectExitAction(Available.Items.First.MAKE_UP, Available.Levels.Main.FIRST_ROOM));
+        gameGraphGenerator.addUserAction( ActionFactory.createSelectUseAction(Available.Items.First.MAKE_UP, Available.Levels.Main.FIRST_ROOM));
+        gameGraphGenerator.addUserAction( ActionFactory.createUseAction(Available.Items.First.MAKE_UP, Available.Items.First.USED_MAKE_UP, Available.Levels.Main.FIRST_ROOM, Available.Levels.First.LIVING_ROOM));
+//
+        gameGraphGenerator.addUserAction( ActionFactory.createPickAction(Available.Items.First.DOOR_HANDLE, Available.Levels.Main.FIRST_ROOM, Available.Levels.First.LIVING_ROOM));
+        gameGraphGenerator.addUserAction( ActionFactory.createSelectAction(Available.Items.First.DOOR_HANDLE, Available.Levels.Main.FIRST_ROOM));
+        gameGraphGenerator.addUserAction( ActionFactory.createDeselectAction(Available.Items.First.DOOR_HANDLE, Available.Levels.Main.FIRST_ROOM));
+        gameGraphGenerator.addUserAction( ActionFactory.createSelectExitAction(Available.Items.First.DOOR_HANDLE, Available.Levels.Main.FIRST_ROOM));
 
-        gameGraphGenerator.addUserAction( ActionFactory.createPickAction(AvailableItems.FirstRoom.MAKE_UP, AvailableRooms.FIRST_ROOM, AvailableRooms.LIVING_ROOM));
-        gameGraphGenerator.addUserAction( ActionFactory.createSelectAction(AvailableItems.FirstRoom.MAKE_UP, AvailableRooms.FIRST_ROOM));
-        gameGraphGenerator.addUserAction( ActionFactory.createDeselectAction(AvailableItems.FirstRoom.MAKE_UP, AvailableRooms.FIRST_ROOM));
-        gameGraphGenerator.addUserAction( ActionFactory.createSelectExitAction(AvailableItems.FirstRoom.MAKE_UP, AvailableRooms.FIRST_ROOM));
-        gameGraphGenerator.addUserAction( ActionFactory.createSelectUseAction(AvailableItems.FirstRoom.MAKE_UP, AvailableRooms.FIRST_ROOM));
-        gameGraphGenerator.addUserAction( ActionFactory.createUseAction(AvailableItems.FirstRoom.MAKE_UP, AvailableItems.FirstRoom.USED_MAKE_UP, AvailableRooms.FIRST_ROOM, AvailableRooms.LIVING_ROOM));
+        gameGraphGenerator.addUserAction( ActionFactory.createPickAction(Available.Items.First.SCREW, Available.Levels.Main.FIRST_ROOM, Available.Levels.First.LIVING_ROOM));
+        gameGraphGenerator.addUserAction( ActionFactory.createSelectAction(Available.Items.First.SCREW, Available.Levels.Main.FIRST_ROOM));
+        gameGraphGenerator.addUserAction( ActionFactory.createDeselectAction(Available.Items.First.SCREW, Available.Levels.Main.FIRST_ROOM));
+        gameGraphGenerator.addUserAction( ActionFactory.createSelectExitAction(Available.Items.First.SCREW, Available.Levels.Main.FIRST_ROOM));
 
-        gameGraphGenerator.addUserAction( ActionFactory.createPickAction(AvailableItems.FirstRoom.DOOR_HANDLE, AvailableRooms.FIRST_ROOM, AvailableRooms.LIVING_ROOM));
-        gameGraphGenerator.addUserAction( ActionFactory.createSelectAction(AvailableItems.FirstRoom.DOOR_HANDLE, AvailableRooms.FIRST_ROOM));
-        gameGraphGenerator.addUserAction( ActionFactory.createDeselectAction(AvailableItems.FirstRoom.DOOR_HANDLE, AvailableRooms.FIRST_ROOM));
-        gameGraphGenerator.addUserAction( ActionFactory.createSelectExitAction(AvailableItems.FirstRoom.DOOR_HANDLE, AvailableRooms.FIRST_ROOM));
+        gameGraphGenerator.addUserAction( ActionFactory.createSelectCombineAction(Available.Items.First.SCREW, Available.Levels.Main.FIRST_ROOM));
+        gameGraphGenerator.addUserAction( ActionFactory.createSelectCombineAction(Available.Items.First.DOOR_HANDLE, Available.Levels.Main.FIRST_ROOM));
 
-        gameGraphGenerator.addUserAction( ActionFactory.createPickAction(AvailableItems.FirstRoom.SCREW, AvailableRooms.FIRST_ROOM, AvailableRooms.TV_ROOM));
-        gameGraphGenerator.addUserAction( ActionFactory.createSelectAction(AvailableItems.FirstRoom.SCREW, AvailableRooms.FIRST_ROOM));
-        gameGraphGenerator.addUserAction( ActionFactory.createDeselectAction(AvailableItems.FirstRoom.SCREW, AvailableRooms.FIRST_ROOM));
-        gameGraphGenerator.addUserAction( ActionFactory.createSelectExitAction(AvailableItems.FirstRoom.SCREW, AvailableRooms.FIRST_ROOM));
+        gameGraphGenerator.addUserAction( ActionFactory.createCombineAction(Available.Items.First.DOOR_HANDLE, Available.Items.First.SCREW, Available.Items.First.COMBINED_DOOR_HANDLE, Available.Levels.Main.FIRST_ROOM));
+        gameGraphGenerator.addUserAction( ActionFactory.createCombineAction(Available.Items.First.SCREW, Available.Items.First.DOOR_HANDLE, Available.Items.First.COMBINED_DOOR_HANDLE, Available.Levels.Main.FIRST_ROOM));
+        gameGraphGenerator.addUserAction( ActionFactory.createSelectAction(Available.Items.First.COMBINED_DOOR_HANDLE, Available.Levels.Main.FIRST_ROOM));
+        gameGraphGenerator.addUserAction( ActionFactory.createDeselectAction(Available.Items.First.COMBINED_DOOR_HANDLE, Available.Levels.Main.FIRST_ROOM));
+        gameGraphGenerator.addUserAction( ActionFactory.createSelectExitAction(Available.Items.First.COMBINED_DOOR_HANDLE, Available.Levels.Main.FIRST_ROOM));
+        gameGraphGenerator.addUserAction( ActionFactory.createSelectUseAction(Available.Items.First.COMBINED_DOOR_HANDLE, Available.Levels.Main.FIRST_ROOM));
+        gameGraphGenerator.addUserAction( ActionFactory.createUseAction(Available.Items.First.COMBINED_DOOR_HANDLE, Available.Items.First.USED_COMBINED_DOOR_HANDLE, Available.Levels.Main.FIRST_ROOM, Available.Levels.First.LIVING_ROOM));
+        gameGraphGenerator.addUserAction( ActionFactory.createExitAction(Available.Items.First.USED_COMBINED_DOOR_HANDLE, Available.Levels.Main.FIRST_ROOM, Available.Levels.First.LIVING_ROOM));
 
-        gameGraphGenerator.addUserAction( ActionFactory.createSelectCombineAction(AvailableItems.FirstRoom.SCREW, AvailableRooms.FIRST_ROOM));
-        gameGraphGenerator.addUserAction( ActionFactory.createSelectCombineAction(AvailableItems.FirstRoom.DOOR_HANDLE, AvailableRooms.FIRST_ROOM));
+        gameGraphGenerator.addUserAction( ActionFactory.createDismantleAction(Available.Items.First.COMBINED_DOOR_HANDLE, EnumSet.of(Available.Items.First.SCREW, Available.Items.First.DOOR_HANDLE), Available.Levels.Main.FIRST_ROOM));
 
-        gameGraphGenerator.addUserAction( ActionFactory.createCombineAction(AvailableItems.FirstRoom.DOOR_HANDLE, AvailableItems.FirstRoom.SCREW, AvailableItems.FirstRoom.COMBINED_DOOR_HANDLE, AvailableRooms.FIRST_ROOM));
-        gameGraphGenerator.addUserAction( ActionFactory.createCombineAction(AvailableItems.FirstRoom.SCREW, AvailableItems.FirstRoom.DOOR_HANDLE, AvailableItems.FirstRoom.COMBINED_DOOR_HANDLE, AvailableRooms.FIRST_ROOM));
-        gameGraphGenerator.addUserAction( ActionFactory.createSelectAction(AvailableItems.FirstRoom.COMBINED_DOOR_HANDLE, AvailableRooms.FIRST_ROOM));
-        gameGraphGenerator.addUserAction( ActionFactory.createDeselectAction(AvailableItems.FirstRoom.COMBINED_DOOR_HANDLE, AvailableRooms.FIRST_ROOM));
-        gameGraphGenerator.addUserAction( ActionFactory.createSelectExitAction(AvailableItems.FirstRoom.COMBINED_DOOR_HANDLE, AvailableRooms.FIRST_ROOM));
-        gameGraphGenerator.addUserAction( ActionFactory.createSelectUseAction(AvailableItems.FirstRoom.COMBINED_DOOR_HANDLE, AvailableRooms.FIRST_ROOM));
-        gameGraphGenerator.addUserAction( ActionFactory.createUseAction(AvailableItems.FirstRoom.COMBINED_DOOR_HANDLE, AvailableItems.FirstRoom.USED_COMBINED_DOOR_HANDLE, AvailableRooms.FIRST_ROOM, AvailableRooms.LIVING_ROOM));
-        gameGraphGenerator.addUserAction( ActionFactory.createExitAction(AvailableItems.FirstRoom.USED_COMBINED_DOOR_HANDLE, AvailableRooms.FIRST_ROOM, AvailableRooms.LIVING_ROOM));
-
-        gameGraphGenerator.addUserAction( ActionFactory.createDismantleAction(AvailableItems.FirstRoom.COMBINED_DOOR_HANDLE, EnumSet.of(AvailableItems.FirstRoom.SCREW, AvailableItems.FirstRoom.DOOR_HANDLE), AvailableRooms.FIRST_ROOM));
-
-        gameGraphGenerator.addUserAction( ActionFactory.createZoomAction(AvailableItems.FirstRoom.TV, AvailableRooms.FIRST_ROOM, AvailableRooms.LIVING_ROOM, AvailableRooms.TV_ROOM));
-        gameGraphGenerator.addUserAction( ActionFactory.createBackAction(AvailableRooms.FIRST_ROOM, AvailableRooms.TV_ROOM, AvailableRooms.LIVING_ROOM));
+        gameGraphGenerator.addUserAction( ActionFactory.createZoomAction(Available.Items.First.TV, Available.Levels.Main.FIRST_ROOM, Available.Levels.First.LIVING_ROOM, Available.Levels.First.LIVING_ROOM));
+        gameGraphGenerator.addUserAction( ActionFactory.createBackAction(Available.Levels.Main.FIRST_ROOM, Available.Levels.First.LIVING_ROOM, Available.Levels.First.LIVING_ROOM));
 
         gameGraphGenerator.addUserAction( ActionFactory.createMenuAction());
 

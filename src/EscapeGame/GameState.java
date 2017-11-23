@@ -1,5 +1,8 @@
 package EscapeGame;
 
+import ExampleEscapeGame.Available;
+import ExampleEscapeGame.Available.Levels;
+
 import java.util.ArrayList;
 
 /**
@@ -33,9 +36,9 @@ public class GameState {
      * @return EscapeGame.GameState that fulfills the above condition
      */
     public static GameState fromMenu(){
-        GameCondition levelMenu = new GameCondition(AvailableRooms.MENU.name(), GameCondition.State.TRUE);
+        GameCondition levelMenu = new GameCondition(Available.Levels.Main.MENU.name(), GameCondition.State.TRUE);
         GameCondition selectedMenu = new GameCondition("", GameCondition.State.FALSE);
-        GameCondition gameAction = new GameCondition(AvailableActions.Option.PICK.name(), GameCondition.State.TRUE);
+        GameCondition gameAction = new GameCondition(Available.Actions.PICK.name(), GameCondition.State.TRUE);
         ArrayList<GameCondition> pickedItems = new ArrayList<>();
         ArrayList<GameCondition> items = new ArrayList<>();
 

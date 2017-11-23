@@ -310,6 +310,9 @@ public class StateBinarization {
      */
     private long binarizeCount(PROPERTY property, GameCondition condition) {
         long shiftAmount = mPropertyBitStart.get( property);
+        if ( mPropertyValues.get(property).get( condition) == null){
+            System.out.println( property.name() + " " + condition.toString());
+        }
         long value = mPropertyValues.get(property).get( condition);
         //shift amount to map to correct property location
         return value << shiftAmount;

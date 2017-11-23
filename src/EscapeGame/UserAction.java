@@ -1,7 +1,5 @@
 package EscapeGame;
 
-import EscapeGame.EscapeScenarioCondition;
-
 /**
  * Denotes the actions in the game, each action requires certain pre state in the game
  * and every action causes a state change in the game state.
@@ -27,10 +25,6 @@ public class UserAction extends Game.UserAction{
     public EscapeScenarioCondition getPostCondition() {
         return mPostCondition;
     }
-
-//    public String getName() {
-//        return mName;
-//    }
 
     /**
      * String representation of the class

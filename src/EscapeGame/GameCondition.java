@@ -11,12 +11,6 @@ import java.util.Objects;
  *  - Must not exist {@link GameCondition.State#FALSE}
  */
 public class GameCondition extends Condition {
-    /**
-     * Name of the condition
-     */
-    private String mName;
-    private State mState;
-
     public GameCondition (){
         super();
     }

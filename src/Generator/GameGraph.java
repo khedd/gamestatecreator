@@ -61,6 +61,12 @@ public class GameGraph<T> {
             EscapeScenarioCondition esc = stateBinarization.debinarize((Long) nodes.getKey());
 //            esc.toString()
         }
+
+    }
+
+
+    public Set<T> getVertices (){
+        return mGraph.keySet();
     }
 
 }

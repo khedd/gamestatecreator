@@ -6,6 +6,7 @@ import EscapeGame.StateBinarization;
 import EscapeGame.UserAction;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * Generates a GraphNode from given rules {@link UserAction} and initial {@link GameState}
@@ -82,7 +83,10 @@ public class GameGraphGenerator {
      * TODO this method should print the graph formed by the {@link #generate()}
      */
     public void print(){
-
+        Set<Long> states = mGameGraph.getVertices();
+        for ( Long state: states){
+            System.out.println( mStateBinarization.debinarize( state).toString());
+        }
 //        mGraphNode.print();
     }
 
