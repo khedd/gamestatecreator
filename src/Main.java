@@ -78,7 +78,7 @@ class Main {
         GameGraphGenerator gameGraphGenerator = new GameGraphGenerator(menuState, stateBinarization);
 
         gameGraphGenerator.addUserAction( ActionFactory.createStartAction(Available.Levels.Main.FIRST_ROOM, Available.Levels.First.LIVING_ROOM));
-//
+
         gameGraphGenerator.addUserAction( ActionFactory.createPickAction(Available.Items.First.MAKE_UP, Available.Levels.Main.FIRST_ROOM, Available.Levels.First.LIVING_ROOM));
         gameGraphGenerator.addUserAction( ActionFactory.createSelectAction(Available.Items.First.MAKE_UP, Available.Levels.Main.FIRST_ROOM));
         gameGraphGenerator.addUserAction( ActionFactory.createDeselectAction(Available.Items.First.MAKE_UP, Available.Levels.Main.FIRST_ROOM));
@@ -110,7 +110,7 @@ class Main {
 
         gameGraphGenerator.addUserAction( ActionFactory.createDismantleAction(Available.Items.First.COMBINED_DOOR_HANDLE, EnumSet.of(Available.Items.First.SCREW, Available.Items.First.DOOR_HANDLE), Available.Levels.Main.FIRST_ROOM));
 
-        gameGraphGenerator.addUserAction( ActionFactory.createZoomAction(Available.Items.First.TV, Available.Levels.Main.FIRST_ROOM, Available.Levels.First.LIVING_ROOM, Available.Levels.First.LIVING_ROOM));
+        gameGraphGenerator.addUserAction( ActionFactory.createZoomAction(Available.Items.First.TV, Available.Levels.Main.FIRST_ROOM, Available.Levels.First.LIVING_ROOM, Levels.First.TV_ROOM));
         gameGraphGenerator.addUserAction( ActionFactory.createBackAction(Available.Levels.Main.FIRST_ROOM, Available.Levels.First.LIVING_ROOM, Available.Levels.First.LIVING_ROOM));
 
         gameGraphGenerator.addUserAction( ActionFactory.createMenuAction());

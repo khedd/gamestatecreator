@@ -85,6 +85,7 @@ public class GameGraphGenerator {
     public void print(){
         Set<Long> states = mGameGraph.getVertices();
         for ( Long state: states){
+//            System.out.println( state);
             System.out.println( mStateBinarization.debinarize( state).toString());
         }
 //        mGraphNode.print();
