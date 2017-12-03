@@ -51,9 +51,14 @@ class BinarizedGameState {
      */
     BinarizedGameState apply (StateBinarization stateBinarization, UserAction userAction){
         EscapeScenarioCondition esc = stateBinarization.debinarize( mCurrentCondition);
-
+//        System.out.println( esc.getLevel().getName());
+        // FIXME: 03.12.2017 this code is a bad one
+        if ( esc.getLevel().getName().compareTo( "THE END") == 0){
+            return null;
+        }
         if (esc.compare ( userAction.mPreCondition)){
             EscapeScenarioCondition newCondition = esc.apply( userAction.mPostCondition);
+
             return new BinarizedGameState( stateBinarization.binarize( newCondition));
         }else
             return null;

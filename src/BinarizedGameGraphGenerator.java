@@ -71,6 +71,7 @@ class BinarizedGameGraphGenerator {
      * TODO this method should print the graph formed by the {@link #generate()}
      */
     void print() {
+        System.out.println( "Cyclometic Complexity: " + mGameGraph.calculateCyclometicComplexity());
         Set<Long> states = mGameGraph.getVertices();
         for (Long state : states) {
             System.out.println( state);

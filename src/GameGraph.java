@@ -62,4 +62,23 @@ public class GameGraph<T> {
         return mGraph.keySet();
     }
 
+
+    public int calculateCyclometicComplexity (){
+        int totalNodes = mGraph.size();
+        int totalEdges = 0;
+        int exits = 0;
+        for ( Map.Entry<T, ArrayList<GameGraphNode<T>>> nodes: mGraph.entrySet()){
+            int size = nodes.getValue().size();
+            if ( size == 0){
+                exits++;
+            }else{
+                totalEdges += size;
+            }
+        }
+        System.out.println(" Total Edges: " + totalEdges + " totalNodes: " + totalNodes + " exits: " + exits);
+        int complexity = totalEdges - totalNodes + 2 * exits;
+        return complexity;
+
+
+    }
 }
