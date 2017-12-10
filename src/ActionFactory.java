@@ -210,7 +210,7 @@ public class ActionFactory {
 
         preESC = new EscapeScenarioCondition(preLevelCond, preSelectedCond, preGameActCond, preItems, prePickedItems);
         postESC = new EscapeScenarioCondition(postLevelCond, postSelectedCond, postGameActCond, postItems, postPickedItems);
-        return new UserAction("SELECT EXIT " + item.name(), preESC, postESC);
+        return new UserAction("SELECT_EXIT " + item.name(), preESC, postESC);
     }
 
     /**
@@ -353,7 +353,15 @@ public class ActionFactory {
         preESC = new EscapeScenarioCondition(preLevelCond, preSelectedCond, preGameActCond, preItems, prePickedItems, preUsedItems, preSubRoomCond);
         postESC = new EscapeScenarioCondition(postLevelCond, postSelectedCond, postGameActCond, postItems, postPickedItems, postUsedItems, postSubRoomCond);
 
-        return new UserAction("DISMANTLE " + item.name() + " " + dismantledItems.toString(), preESC, postESC);
+        String dismantledString = "";
+        for (Enum<?> dismantledItem : dismantledItems) {
+            if ( dismantledString.isEmpty()){
+                dismantledString += dismantledItem.name();
+            }else{
+                dismantledString += "," + dismantledItem.name();
+            }
+        }
+        return new UserAction("DISMANTLE " + item.name() + " => " + dismantledString, preESC, postESC);
 
     }
 
@@ -509,7 +517,7 @@ public class ActionFactory {
         escapeScenarioConditionPreStart = new EscapeScenarioCondition(preLevelCond, preSelectedCond, preGameActCond, preItems, prePickedItems, preUsedItems, preSubRoomCondition);
         escapeScenarioConditionPostStart = new EscapeScenarioCondition(postLevelCond, postSelectedCond, postGameActCond, postItems, postPickedItems, postUsedItems, postSubRoomCondition);
 
-        return new UserAction("BACK ", escapeScenarioConditionPreStart, escapeScenarioConditionPostStart);
+        return new UserAction("BACK", escapeScenarioConditionPreStart, escapeScenarioConditionPostStart);
     }
 
 }

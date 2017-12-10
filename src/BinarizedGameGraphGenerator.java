@@ -1,4 +1,6 @@
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Set;
 
 /**
@@ -64,26 +66,13 @@ class BinarizedGameGraphGenerator {
             }
             mGameGraph.addChildren( node, nodes);
         }
-        mGameGraph.print ();
     }
 
-    /**
-     * TODO this method should print the graph formed by the {@link #generate()}
+   /**
+     * Adds the given user action to the GameGraphGenerator
+     * Used to fork new states from graph node
+     * @param userAction User action such as {start game, pick an item, return to menu}
      */
-    void print() {
-        System.out.println( "Cyclometic Complexity: " + mGameGraph.calculateCyclometicComplexity());
-        Set<Long> states = mGameGraph.getVertices();
-        for (Long state : states) {
-            System.out.println( state);
-//            System.out.println(mStateBinarization.debinarize(state).toString());
-        }
-    }
-
-        /**
-         * Adds the given user action to the GameGraphGenerator
-         * Used to fork new states from graph node
-         * @param userAction User action such as {start game, pick an item, return to menu}
-         */
     void addUserAction(UserAction userAction){
         mAvailableUserActions.add(userAction);
     }
@@ -95,5 +84,41 @@ class BinarizedGameGraphGenerator {
      */
     ArrayList<UserAction> getUserActions (){
         return  mAvailableUserActions;
+    }
+
+    public void printStatistics() {
+        // TODO: 10.12.2017
+        System.out.println( "-----------Statistics-----------");
+        mGameGraph.calculateCyclometicComplexity();
+    }
+
+    public void playSequences(ArrayList<ArrayList<String>> sequences) {
+        // TODO: 10.12.2017
+        System.out.println( "Playing Sequences");
+        for (ArrayList<String> sequence : sequences) {
+            playSequence ( sequence);
+        }
+    }
+
+    private void playSequence(ArrayList<String> sequence) {
+        reset();
+        Long currNode = mGraphNode.getVertex().getCondition();
+        for (String seq : sequence) {
+            Long nextNode = mGameGraph.visit( currNode, seq);
+            if ( nextNode == null) {
+                System.out.println("cannot play the sequence: "
+                        + Arrays.toString( sequence.toArray())
+                        + "Error at: " + seq);
+                mGameGraph.printAvailableActions( currNode);
+                break;
+            }
+            currNode = nextNode;
+        }
+
+    }
+
+    public void printCoverage() {
+        // TODO: 10.12.2017
+        mGameGraph.printEdgeCoverage ();
     }
 }

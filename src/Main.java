@@ -1,3 +1,4 @@
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.EnumSet;
 
@@ -59,7 +60,75 @@ class Main {
         BinarizedGameGraphGenerator gameGraphGenerator = initializeGraphActions( stateBinarization);
 
         gameGraphGenerator.generate();
-        gameGraphGenerator.print();
+//        gameGraphGenerator.print();
+
+        gameGraphGenerator.printStatistics();
+
+        ArrayList<ArrayList<String>> sequences = loadSequences( "");
+        gameGraphGenerator.playSequences ( sequences);
+        gameGraphGenerator.printCoverage ();
+
+    }
+
+
+    // TODO: 10.12.2017 read from file
+    private static ArrayList<ArrayList<String>> loadSequences ( String filename){
+        ArrayList<ArrayList<String>> sequences = new ArrayList<>();
+        ArrayList<String> seq1 = new ArrayList<>();
+        seq1.add("START GAME");
+        seq1.add("PICK DOOR_HANDLE");
+        seq1.add("ZOOM TV");
+        ArrayList<String> seq2 = new ArrayList<>();
+        seq2.add( "START GAME");
+        seq2.add( "RETURN MENU");
+        seq2.add( "START GAME");
+        seq2.add( "PICK DOOR_HANDLE");
+        seq2.add( "PICK MAKE_UP");
+        seq2.add( "ZOOM TV");
+        seq2.add( "PICK SCREW");
+        seq2.add( "BACK");
+        seq2.add( "SELECT DOOR_HANDLE");
+        seq2.add( "SELECT_COMBINE DOOR_HANDLE");
+        seq2.add( "COMBINE DOOR_HANDLE SCREW => COMBINED_DOOR_HANDLE");
+        seq2.add( "SELECT COMBINED_DOOR_HANDLE");
+        seq2.add( "DISMANTLE COMBINED_DOOR_HANDLE => DOOR_HANDLE,SCREW");
+        seq2.add( "SELECT DOOR_HANDLE");
+        seq2.add( "SELECT_COMBINE DOOR_HANDLE");
+        seq2.add( "COMBINE DOOR_HANDLE SCREW => COMBINED_DOOR_HANDLE");
+        seq2.add( "SELECT COMBINED_DOOR_HANDLE");
+        seq2.add( "SELECT_USE COMBINED_DOOR_HANDLE");
+        seq2.add( "USE COMBINED_DOOR_HANDLE => USED_COMBINED_DOOR_HANDLE");
+        seq2.add( "EXIT USED_COMBINED_DOOR_HANDLE");
+        sequences.add( seq1);
+        sequences.add( seq2);
+
+        ArrayList<String> seq3 = new ArrayList<>();
+        seq3.add( "START GAME");
+        seq3.add( "RETURN MENU");
+        seq3.add( "START GAME");
+        seq3.add( "PICK DOOR_HANDLE");
+        seq3.add( "PICK MAKE_UP");
+        seq3.add( "SELECT MAKE_UP");
+        seq3.add( "SELECT_EXIT MAKE_UP");
+
+        seq3.add( "ZOOM TV");
+        seq3.add( "PICK SCREW");
+        seq3.add( "BACK");
+        seq3.add( "SELECT DOOR_HANDLE");
+        seq3.add( "SELECT_COMBINE DOOR_HANDLE");
+        seq3.add( "COMBINE DOOR_HANDLE SCREW => COMBINED_DOOR_HANDLE");
+        seq3.add( "SELECT COMBINED_DOOR_HANDLE");
+        seq3.add( "DISMANTLE COMBINED_DOOR_HANDLE => DOOR_HANDLE,SCREW");
+        seq3.add( "SELECT DOOR_HANDLE");
+        seq3.add( "SELECT_COMBINE DOOR_HANDLE");
+        seq3.add( "COMBINE DOOR_HANDLE SCREW => COMBINED_DOOR_HANDLE");
+        seq3.add( "SELECT COMBINED_DOOR_HANDLE");
+        seq3.add( "SELECT_USE COMBINED_DOOR_HANDLE");
+        seq3.add( "USE COMBINED_DOOR_HANDLE => USED_COMBINED_DOOR_HANDLE");
+        seq3.add( "EXIT USED_COMBINED_DOOR_HANDLE");
+        sequences.add( seq3);
+
+        return sequences;
     }
 
     private static void binarization (){
