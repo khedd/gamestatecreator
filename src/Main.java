@@ -67,6 +67,7 @@ class Main {
         ArrayList<ArrayList<String>> sequences = loadSequences( "");
         gameGraphGenerator.playSequences ( sequences);
         gameGraphGenerator.printCoverage ();
+        gameGraphGenerator.printBasisPaths();
 
     }
 

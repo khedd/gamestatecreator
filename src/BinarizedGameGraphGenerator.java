@@ -1,7 +1,5 @@
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Set;
 
 /**
  * Generates a GraphNode from given rules {@link UserAction} and initial {@link GameState}
@@ -50,7 +48,7 @@ class BinarizedGameGraphGenerator {
      */
     private void generate (BinarizedGraphNode binarizedGraphNode){
         mGameGraph.addNode( binarizedGraphNode.getVertex().getCondition());
-
+        mGameGraph.setStartNode( binarizedGraphNode.getVertex().getCondition());
         while ( mGameGraph.hasNext ()){
             Long node = mGameGraph.getNext();
             ArrayList<GameGraph.GameGraphNode<Long>> nodes = new ArrayList<>();
@@ -66,6 +64,7 @@ class BinarizedGameGraphGenerator {
             }
             mGameGraph.addChildren( node, nodes);
         }
+        mGameGraph.finalize((long) -1);
     }
 
    /**
@@ -109,7 +108,7 @@ class BinarizedGameGraphGenerator {
                 System.out.println("cannot play the sequence: "
                         + Arrays.toString( sequence.toArray())
                         + "Error at: " + seq);
-                mGameGraph.printAvailableActions( currNode);
+                mGameGraph.printAdjacencyListRow( currNode);
                 break;
             }
             currNode = nextNode;
@@ -120,5 +119,9 @@ class BinarizedGameGraphGenerator {
     public void printCoverage() {
         // TODO: 10.12.2017
         mGameGraph.printEdgeCoverage ();
+    }
+
+    public void printBasisPaths (){
+        mGameGraph.printBasisPaths();
     }
 }
