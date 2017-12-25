@@ -1,3 +1,9 @@
+import graph.GameGraph;
+import graph.MCTS;
+import graph.ai.MaxPathScoring;
+import graph.ai.RandomRollout;
+import graph.ai.UCB1;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -56,15 +62,22 @@ class BinarizedGameGraphGenerator {
             for (UserAction uAction : mAvailableUserActions) {
                 BinarizedGameState gs = bgs.apply( mStateBinarization, uAction);
                 if ( gs != null){
-                    GameGraph.GameGraphNode<Long> gameGraphNode = new GameGraph.GameGraphNode<>();
-                    gameGraphNode.node = gs.getCondition(); // aka state
-                    gameGraphNode.action = uAction.getAction();
+                    GameGraph.GameGraphNode<Long> gameGraphNode = new GameGraph.GameGraphNode<>(gs.getCondition(), uAction.getAction());
                     nodes.add( gameGraphNode);
                 }
             }
             mGameGraph.addChildren( node, nodes);
         }
         mGameGraph.finalize((long) -1);
+
+        //TODO totally experimental
+        MCTS.ScoringPolicy<Long> maxPathScoring = new MaxPathScoring<>();
+        MCTS.RolloutPolicy<Long> randomRollout = new RandomRollout<>(maxPathScoring, 100);
+        MCTS.SelectionCriteria<Long> selectionCriteria = new UCB1<>(4.0);
+        MCTS<Long> mcts = new MCTS<>(mGameGraph.getGraph(), mGameGraph.getStartNode().node);
+        mcts.setPolicies (maxPathScoring, randomRollout, selectionCriteria);
+        Long node = mcts.run();
+        System.out.println( "After MCTS:" + node);
     }
 
    /**

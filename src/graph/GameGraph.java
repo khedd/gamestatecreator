@@ -1,3 +1,5 @@
+package graph;
+
 import java.io.*;
 import java.util.*;
 
@@ -11,6 +13,8 @@ import java.util.*;
  */
 public class GameGraph<T> {
 
+
+
     /**
      * Inner class for holding the node data and the edge
      * Currently edge is hold as string, might be parametrized in the future
@@ -18,7 +22,7 @@ public class GameGraph<T> {
      */
     public static class GameGraphNode<T>{
 
-        T node; /// vertex
+        public T node; /// vertex
         String action; /// edge
         boolean visited = false;
 
@@ -36,7 +40,7 @@ public class GameGraph<T> {
          * @param node Node data
          * @param action Edge
          */
-        GameGraphNode(T node, String action) {
+        public GameGraphNode(T node, String action) {
             this.node = node;
             this.action = action;
         }
@@ -68,6 +72,15 @@ public class GameGraph<T> {
     //information after we convert to adjacency matrix
     private GameGraphNode<T> startNode = null;
     private GameGraphNode<T> endNode = null;
+
+
+    public GameGraphNode<T> getStartNode() {
+        return startNode;
+    }
+
+    public HashMap<T, ArrayList<GameGraphNode<T>>> getGraph() {
+        return mGraph;
+    }
 
 
     /**
@@ -191,15 +204,6 @@ public class GameGraph<T> {
             for (GameGraphNode<T> gameGraphNode : nodes) {
                 System.out.println(" " + gameGraphNode.action);
             }
-        }
-    }
-
-    /**
-     * prints the adjacency list in a top down approach
-     */
-    public void printTopDown ( StateBinarization stateBinarization){
-        for ( Map.Entry<T, ArrayList<GameGraphNode<T>>> nodes: mGraph.entrySet()){
-            EscapeScenarioCondition esc = stateBinarization.debinarize((Long) nodes.getKey());
         }
     }
 
