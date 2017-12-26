@@ -74,10 +74,15 @@ class BinarizedGameGraphGenerator {
         MCTS.ScoringPolicy<Long> maxPathScoring = new MaxPathScoring<>();
         MCTS.RolloutPolicy<Long> randomRollout = new RandomRollout<>(maxPathScoring, 100);
         MCTS.SelectionCriteria<Long> selectionCriteria = new UCB1<>(4.0);
-        MCTS<Long> mcts = new MCTS<>(mGameGraph.getGraph(), mGameGraph.getStartNode().node);
-        mcts.setPolicies (maxPathScoring, randomRollout, selectionCriteria);
-        Long node = mcts.run();
-        System.out.println( "After MCTS:" + node);
+        Long currentNode = mGameGraph.getStartNode().node;
+
+        for (int i = 0; i < 30; i++) {
+            MCTS<Long> mcts = new MCTS<>(mGameGraph.getGraph(), currentNode);
+            mcts.setPolicies (maxPathScoring, randomRollout, selectionCriteria);
+            currentNode = mcts.run();
+            System.out.println( "After MCTS:" + currentNode);
+        }
+
     }
 
    /**

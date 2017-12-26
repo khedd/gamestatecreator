@@ -96,12 +96,15 @@ public class MCTS<T> {
      */
     private double rollout(T node){
         mRolloutPolicy.reset ();
+        T currentNode = node;
         ArrayList<T> nodesVisited = new ArrayList<>();
         for (int i = 0; i < mSimulationLength; i++) {
             //get currentNodes children
-            ArrayList<GameGraph.GameGraphNode<T>> gameGraphNodes = mGraph.get(node);
+            nodesVisited.add( currentNode);
+            ArrayList<GameGraph.GameGraphNode<T>> gameGraphNodes = mGraph.get(currentNode);
             if ( gameGraphNodes != null && !gameGraphNodes.isEmpty()){
-                mRolloutPolicy.select(node, gameGraphNodes);
+                //update the current node from the selection
+                currentNode = mRolloutPolicy.select(currentNode, gameGraphNodes);
             }else {
                 break; // we have visited a terminal node
             }
@@ -124,8 +127,9 @@ public class MCTS<T> {
             if (!visited.contains( currentNode)) {
                 visited.add( currentNode);
                 update ( node, score);
-                ArrayList<T> parents = mParentMap.get( node);
-                currentNodes.addAll( parents); //continue with parents
+                ArrayList<T> parents = mParentMap.get( currentNode);
+                if ( parents != null)
+                    currentNodes.addAll( parents); //continue with parents
                 //until no parent left
 
             }
@@ -165,11 +169,13 @@ public class MCTS<T> {
     private void treeWalk() {
         T selection = selection();
 
+        //fixme nullptr is thrown here so no selection is returned?
         if ( mVisible.get(selection).visit != 0){
             expansion( selection);
         }else{
             double score = rollout( selection);
             backPropagate( selection, score);
+            mTotalVisits++;
         }
         //select a new node from its children if it exists else chose another
         //increments its count to make less viable?

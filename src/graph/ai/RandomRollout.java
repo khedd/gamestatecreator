@@ -29,6 +29,7 @@ public class RandomRollout<T> extends MCTS.RolloutPolicy<T> {
         //get random
         int childrenCount = children.size();
         Random random = new Random();
+        // FIXME: 26.12.2017 for deugging purposes
         int randInt = random.nextInt( childrenCount);
         T nodeRolled = children.get( randInt).node;
         mNodesVisited.add( nodeRolled);
