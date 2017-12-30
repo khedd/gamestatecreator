@@ -14,7 +14,6 @@ import java.util.*;
 public class GameGraph<T> {
 
 
-
     /**
      * Inner class for holding the node data and the edge
      * Currently edge is hold as string, might be parametrized in the future
@@ -126,6 +125,14 @@ public class GameGraph<T> {
      */
     public void setStartNode ( T node){
         startNode = new GameGraphNode<>(node, "");
+    }
+
+
+    /**
+     * @return returns the end node
+     */
+    public GameGraphNode<T> getEndNode() {
+        return endNode;
     }
 
     /**

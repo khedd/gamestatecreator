@@ -75,12 +75,16 @@ class BinarizedGameGraphGenerator {
         MCTS.RolloutPolicy<Long> randomRollout = new RandomRollout<>(maxPathScoring, 100);
         MCTS.SelectionCriteria<Long> selectionCriteria = new UCB1<>(4.0);
         Long currentNode = mGameGraph.getStartNode().node;
-
-        for (int i = 0; i < 30; i++) {
+        Long endNode = mGameGraph.getEndNode().node;
+        System.out.println("end node: " + endNode);
+        while (true){
             MCTS<Long> mcts = new MCTS<>(mGameGraph.getGraph(), currentNode);
             mcts.setPolicies (maxPathScoring, randomRollout, selectionCriteria);
             currentNode = mcts.run();
             System.out.println( "After MCTS:" + currentNode);
+            if (currentNode.equals(endNode)){
+                break;
+            }
         }
 
     }
@@ -139,6 +143,9 @@ class BinarizedGameGraphGenerator {
         mGameGraph.printEdgeCoverage ();
     }
 
+    /**
+     * // FIXME: 30.12.2017 currently bugged
+     */
     public void printBasisPaths (){
         mGameGraph.printBasisPaths();
     }

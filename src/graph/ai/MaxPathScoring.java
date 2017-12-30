@@ -26,6 +26,6 @@ public class MaxPathScoring<T> extends MCTS.ScoringPolicy<T> {
     public double evaluate(ArrayList<T> nodes) {
         Set<T> set = new HashSet<>();
         set.addAll( nodes);
-        return set.size();
+        return set.size() + 1;
     }
 }

@@ -45,7 +45,7 @@ public class MCTS<T> {
      */
     private T getHighestChild (){
         ArrayList<GameGraph.GameGraphNode<T>> gameGraphNodes = mGraph.get(mStartNode);
-        double maxScore = Double.MIN_VALUE;
+        double maxScore = -1;
         T maxChild = null;
         for (GameGraph.GameGraphNode<T> gameGraphNode: gameGraphNodes){
             double score = mVisible.get(gameGraphNode.node).score;
@@ -81,7 +81,8 @@ public class MCTS<T> {
         ArrayList<GameGraph.GameGraphNode<T>> gameGraphNodes = mGraph.get(node);
         if ( gameGraphNodes != null && !gameGraphNodes.isEmpty()){
             for( GameGraph.GameGraphNode<T> gameGraphNode: gameGraphNodes){
-                mVisible.put( gameGraphNode.node, new StateInformation());
+                if ( mVisible.get(gameGraphNode.node) == null)
+                    mVisible.put( gameGraphNode.node, new StateInformation());
                 updateParentMap( node, gameGraphNode.node);
             }
         }else {
@@ -109,7 +110,9 @@ public class MCTS<T> {
                 break; // we have visited a terminal node
             }
         }
-        return mScoringPolicy.evaluate( nodesVisited);
+        double totalScore = mScoringPolicy.evaluate( nodesVisited);
+
+        return totalScore + 1;
     }
 
     /**
