@@ -1,8 +1,7 @@
 package graph.ai;
 
-import graph.MCTS;
 
-public class UCB1<T> extends MCTS.SelectionCriteria<T>{
+public class UCB1<T> extends SelectionCriteria<T> {
     /**
      * bias term to choose between exploration and exploitation
      */
@@ -23,7 +22,7 @@ public class UCB1<T> extends MCTS.SelectionCriteria<T>{
      * @return UCB1 score
      */
     @Override
-    public double calculate(int totalVisits, MCTS.StateInformation stateInformation) {
+    public double calculate(int totalVisits, StateInformation stateInformation) {
         if ( stateInformation.visit == 0)
             return Double.MAX_VALUE;
         return stateInformation.score + Math.sqrt( mBias * Math.log((double)totalVisits) / (double)stateInformation.visit);

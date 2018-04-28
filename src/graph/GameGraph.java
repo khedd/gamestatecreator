@@ -13,7 +13,6 @@ import java.util.*;
  */
 public class GameGraph<T> {
 
-
     /**
      * Inner class for holding the node data and the edge
      * Currently edge is hold as string, might be parametrized in the future
@@ -22,7 +21,7 @@ public class GameGraph<T> {
     public static class GameGraphNode<T>{
 
         public T node; /// vertex
-        String action; /// edge
+        public String action; /// edge
         boolean visited = false;
 
         /**
@@ -52,6 +51,25 @@ public class GameGraph<T> {
             {
                 return action +  " " + node;
             }
+        }
+
+        @Override
+        public int hashCode() {
+            return node.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (!(obj instanceof GameGraphNode))
+                return false;
+            if (obj == this)
+                return true;
+
+
+            GameGraphNode rhs = (GameGraphNode) obj;
+            if (!rhs.node.equals(node))
+                return false;
+            return rhs.action.compareTo(action) == 0;
         }
     }
 
@@ -200,6 +218,18 @@ public class GameGraph<T> {
         }
     }
 
+
+    /**
+     * resets the coverage by clearing visited data for every node
+     */
+    public void resetCoverage() {
+        for ( Map.Entry<T, ArrayList<GameGraphNode<T>>> nodes: mGraph.entrySet()){
+            for (GameGraphNode<T> gameGraphNode : nodes.getValue()) {
+                gameGraphNode.visited = false;
+            }
+        }
+    }
+
     /**
      * prints a row of adjacency list
      * @param node
@@ -224,6 +254,7 @@ public class GameGraph<T> {
     /**
      * traverse the graph and find how many visited nodes there are
      */
+    @SuppressWarnings("Duplicates")
     public void printEdgeCoverage() {
         int totalEdges = 0;
         int visitedEdges = 0;
@@ -237,6 +268,25 @@ public class GameGraph<T> {
         }
         System.out.println("Total Edges: " + totalEdges +
                            " Visited: " + visitedEdges);
+    }
+
+    /**
+     * returns the edge coverage percent in range [0-100]
+     * @return a double value indicating the coverage amount
+     */
+    @SuppressWarnings("Duplicates")
+    public double getEdgeCoveragePercent() {
+        double totalEdges = 0;
+        double visitedEdges = 0;
+        for ( Map.Entry<T, ArrayList<GameGraphNode<T>>> nodes: mGraph.entrySet()){
+            int size = nodes.getValue().size();
+            totalEdges += size;
+            for (GameGraphNode<T> gameGraphNode : nodes.getValue()) {
+                if ( gameGraphNode.visited)
+                    visitedEdges++;
+            }
+        }
+        return visitedEdges / totalEdges * 100.0;
     }
 
     /**

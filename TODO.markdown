@@ -18,3 +18,7 @@
 
 ### 2017-05-16 ###
  - [x] ActionFactory additional comments
+
+
+### 2018-04-27 ###
+ - [ ] Organize the code into meaningful packages

@@ -1,31 +1,22 @@
 package graph.ai;
 
-import graph.MCTS;
+
+import graph.GameGraph;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-public class MaxPathScoring<T> extends MCTS.ScoringPolicy<T> {
-    /**
-     * return 1 as it will score just one node
-     * @param node
-     * @return
-     */
-    @Override
-    public double evaluate(T node) {
-        return 1;
-    }
+public class MaxPathScoring<T> extends ScoringPolicy<T> {
 
     /**
      * get the number of unique elements in the set
      * @param nodes
-     * @return
+     * @return number of unique nodes
      */
     @Override
-    public double evaluate(ArrayList<T> nodes) {
-        Set<T> set = new HashSet<>();
-        set.addAll( nodes);
+    public double evaluate(ArrayList<GameGraph.GameGraphNode<T>> nodes) {
+        Set<GameGraph.GameGraphNode<T>> set = new HashSet<>(nodes);
         return set.size() + 1;
     }
 }

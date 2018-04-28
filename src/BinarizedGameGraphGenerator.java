@@ -1,11 +1,9 @@
 import graph.GameGraph;
-import graph.MCTS;
-import graph.ai.MaxPathScoring;
-import graph.ai.RandomRollout;
-import graph.ai.UCB1;
+import graph.ai.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 /**
  * Generates a GraphNode from given rules {@link UserAction} and initial {@link GameState}
@@ -71,23 +69,58 @@ class BinarizedGameGraphGenerator {
         mGameGraph.finalize((long) -1);
 
         //TODO totally experimental
-        MCTS.ScoringPolicy<Long> maxPathScoring = new MaxPathScoring<>();
-        MCTS.RolloutPolicy<Long> randomRollout = new RandomRollout<>(maxPathScoring, 100);
-        MCTS.SelectionCriteria<Long> selectionCriteria = new UCB1<>(4.0);
-        Long currentNode = mGameGraph.getStartNode().node;
-        Long endNode = mGameGraph.getEndNode().node;
-        System.out.println("end node: " + endNode);
-        while (true){
-            MCTS<Long> mcts = new MCTS<>(mGameGraph.getGraph(), currentNode);
-            mcts.setPolicies (maxPathScoring, randomRollout, selectionCriteria);
-            currentNode = mcts.run();
-            System.out.println( "After MCTS:" + currentNode);
-            if (currentNode.equals(endNode)){
-                break;
-            }
-        }
+
 
     }
+
+    /**
+     * calls MCTS from the graph start to the end until maxLen is reached
+     * @param maxLen max len to be obtained from the MCTS, if it reaches a terminal node
+     *               it ends but may get in loop so better to set this variable
+     * @param scoreTable scoring table to be used to weight the moves that MCTS take
+     *                   if empty {@link MaxPathScoring} will be used which is to weight
+     *                   the longest unique path
+     * @param defaultScore default score to be used if the action does not exist in table
+     *                     only used if scoreTable is set
+     * @return the path generated using these settings
+     */
+    ArrayList<GameGraph.GameGraphNode<Long>> testWMCTS (int maxLen, HashMap<String, Double> scoreTable, double defaultScore){
+        // initialize the policies to be used in MCTS
+
+        //scoring policy is a bit tricky
+        ScoringPolicy<Long> scoringPolicy;
+        if ( scoreTable == null || scoreTable.isEmpty()) {
+            scoringPolicy = new MaxPathScoring<>();
+        }else {
+            scoringPolicy = new WeightedScoring<>( scoreTable, defaultScore);
+        }
+        RolloutPolicy<Long> randomRollout = new RandomRollout<>(scoringPolicy, 100);
+        SelectionCriteria<Long> selectionCriteria = new UCB1<>(4.0);
+
+        //get the start and end nodes to simulate from correct
+        GameGraph.GameGraphNode<Long> currentNode = mGameGraph.getStartNode();
+        GameGraph.GameGraphNode<Long> endNode = mGameGraph.getEndNode();
+
+        //this will be used to see the path visited
+        ArrayList<GameGraph.GameGraphNode<Long>> visitedNodes = new ArrayList<>();
+        visitedNodes.add( currentNode);
+
+        //run MCTS until maxLen, create a new instance every time as MCTS will give us
+        // one node at a time
+        for (int i = 0; i < maxLen; i++) {
+            MCTS<Long> mcts = new MCTS<>(mGameGraph.getGraph(), currentNode);
+            mcts.setStateBinarizer( mStateBinarization);
+            mcts.setPolicies (scoringPolicy, randomRollout, selectionCriteria);
+            currentNode = mcts.run();
+            visitedNodes.add( currentNode);
+            if (currentNode == null || currentNode.node.equals(endNode.node)){
+                break;
+            }
+//            System.out.println( "After MCTS:" + currentNode);
+        }
+        return visitedNodes;
+    }
+
 
    /**
      * Adds the given user action to the GameGraphGenerator
@@ -107,21 +140,41 @@ class BinarizedGameGraphGenerator {
         return  mAvailableUserActions;
     }
 
+    /**
+     * todo not sure still this method works as graphs with cycles are not adequate
+     */
     public void printStatistics() {
-        // TODO: 10.12.2017
         System.out.println( "-----------Statistics-----------");
         mGameGraph.calculateCyclometicComplexity();
     }
 
+    /**
+     * plays the given sequences
+     * @param sequences composed of strings of actions
+     */
     public void playSequences(ArrayList<ArrayList<String>> sequences) {
-        // TODO: 10.12.2017
         System.out.println( "Playing Sequences");
         for (ArrayList<String> sequence : sequences) {
-            playSequence ( sequence);
+            _playSequence ( sequence);
         }
     }
 
-    private void playSequence(ArrayList<String> sequence) {
+    /**
+     * play the given sequence
+     * @param sequence composed of strings of actions
+     */
+    public void playSequence (ArrayList<String> sequence){
+        _playSequence ( sequence);
+    }
+
+    /**
+     * resets the coverage caused by playing sequences
+     */
+    public void resetCoverage (){
+        mGameGraph.resetCoverage();
+    }
+
+    private void _playSequence(ArrayList<String> sequence) {
         reset();
         Long currNode = mGraphNode.getVertex().getCondition();
         for (String seq : sequence) {
@@ -138,8 +191,18 @@ class BinarizedGameGraphGenerator {
 
     }
 
+    /**
+     * returns the edge coverage percent in range [0-100]
+     * @return a double value indicating the coverage amount
+     */
+    public double getEdgeCoveragePercent (){
+        return mGameGraph.getEdgeCoveragePercent();
+    }
+
+    /**
+     * prints the coverage statistics
+     */
     public void printCoverage() {
-        // TODO: 10.12.2017
         mGameGraph.printEdgeCoverage ();
     }
 

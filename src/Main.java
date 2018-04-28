@@ -1,6 +1,9 @@
+import graph.GameGraph;
+
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashMap;
 
 /**
  * Main entry pint of project GameStateCreator
@@ -17,7 +20,7 @@ class Main {
      */
     public static void main(String[] args){
 //        binarization ();
-        example ();
+        weightedExample ();
     }
 
     private static ArrayList<String> getRooms (){
@@ -60,15 +63,80 @@ class Main {
         BinarizedGameGraphGenerator gameGraphGenerator = initializeGraphActions( stateBinarization);
 
         gameGraphGenerator.generate();
-//        gameGraphGenerator.print();
 
         gameGraphGenerator.printStatistics();
 
         ArrayList<ArrayList<String>> sequences = loadSequences( "");
         gameGraphGenerator.playSequences ( sequences);
         gameGraphGenerator.printCoverage ();
-//        gameGraphGenerator.printBasisPaths();
 
+    }
+
+    /**
+     * use this to get the scoring of a persona finisher whose goal is to finish the
+     * level as soon as possible
+     * @return Scoring table filled with weights that show the priorities of this
+     * persona
+     */
+    private static HashMap<String, Double> getScoringTableFinisher (){
+        HashMap<String, Double> scoreTable = new HashMap<>();
+        scoreTable.put("PICK DOOR_HANDLE", 3.0);
+        scoreTable.put("PICK MAKE_UP", -3.0);
+        scoreTable.put("PICK SCREW", 8.0);
+        scoreTable.put("SELECT DOOR_HANDLE", -5.0);
+        scoreTable.put("COMBINE SCREW DOOR_HANDLE => COMBINED_DOOR_HANDLE", 4.0);
+        scoreTable.put("SELECT COMBINED_DOOR_HANDLE", 3.0);
+        scoreTable.put("EXIT USED_COMBINED_DOOR_HANDLE", 8.0);
+
+
+        return scoreTable;
+    }
+
+    /**
+     * converts the given nodes to a sequence
+     * @param nodes consists of {@link graph.GameGraph.GameGraphNode}
+     * @return sequence with only actions
+     */
+    private static ArrayList<String> toSequence (ArrayList<GameGraph.GameGraphNode<Long>> nodes){
+        ArrayList<String> sequence = new ArrayList<>();
+        //remove the first and last elements as these are are decoys for fake
+        //begin and end state in the current implementation
+        for (int i = 1; i < nodes.size() - 1; i++) {
+            sequence.add( nodes.get(i).action);
+        }
+        return sequence;
+    }
+
+    /**
+     * this example uses weighted scoring to get the paths generated
+     * 28.04.2018 as a part of testing how the weighted MCTS will go
+     */
+    private static void weightedExample (){
+        StateBinarization stateBinarization = new StateBinarization();
+        stateBinarization.addActions( getActions());
+        stateBinarization.addItems( getItems());
+        stateBinarization.addRooms( getRooms());
+        stateBinarization.addSubRooms( getSubRooms());
+        stateBinarization.generate ();
+
+        System.out.println("Game State Creator");
+        BinarizedGameGraphGenerator gameGraphGenerator = initializeGraphActions( stateBinarization);
+        gameGraphGenerator.generate();
+
+        double coveragePercent = 0;
+        double defaultScore = -1;
+        HashMap<String, Double> scoreTable = getScoringTableFinisher();
+
+//        scoreTable = null;
+        for (int i = 0; i < 20; i++) {
+
+            ArrayList<GameGraph.GameGraphNode<Long>> visitedNodes;
+            visitedNodes = gameGraphGenerator.testWMCTS( 500, scoreTable, defaultScore);
+            ArrayList<String> sequence = toSequence ( visitedNodes);
+            gameGraphGenerator.playSequence ( sequence);
+            coveragePercent = gameGraphGenerator.getEdgeCoveragePercent ();
+            System.out.println( "Coverage percent at iteration " + i + " :" + coveragePercent);
+        }
     }
 
 
