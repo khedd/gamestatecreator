@@ -22,7 +22,7 @@ public class GameGraph<T> {
 
         public T node; /// vertex
         public String action; /// edge
-        boolean visited = false;
+        public int visitCount = 0; //hope this will not overflow
 
         /**
          * initializes the node with empty parameters
@@ -30,7 +30,7 @@ public class GameGraph<T> {
         GameGraphNode() {
             node = null;
             action = "";
-            visited = false;
+            visitCount = 0;
         }
 
         /**
@@ -41,6 +41,12 @@ public class GameGraph<T> {
         public GameGraphNode(T node, String action) {
             this.node = node;
             this.action = action;
+        }
+
+        public GameGraphNode(GameGraphNode<T> gameGraphNode) {
+            this.node = gameGraphNode.node;
+            this.action = gameGraphNode.action;
+            this.visitCount = gameGraphNode.visitCount;
         }
 
         @Override
@@ -166,7 +172,7 @@ public class GameGraph<T> {
         for ( Map.Entry<T, ArrayList<GameGraphNode<T>>> nodes: mGraph.entrySet()){
             if ( nodes.getValue().isEmpty()){
                 endNodes.add( nodes.getKey());
-                System.out.println( nodes);
+//                System.out.println( nodes);
             }
         }
         for(T t: endNodes){
@@ -208,7 +214,7 @@ public class GameGraph<T> {
             for (GameGraphNode<T> gameGraphNode : nodes) {
 //                System.out.println("NODE ACTIONS: " + gameGraphNode.action);
                 if ( gameGraphNode.action.compareTo( action) == 0){
-                    gameGraphNode.visited = true;
+                    gameGraphNode.visitCount++;
                     return gameGraphNode.node;
                 }
             }
@@ -225,7 +231,7 @@ public class GameGraph<T> {
     public void resetCoverage() {
         for ( Map.Entry<T, ArrayList<GameGraphNode<T>>> nodes: mGraph.entrySet()){
             for (GameGraphNode<T> gameGraphNode : nodes.getValue()) {
-                gameGraphNode.visited = false;
+                gameGraphNode.visitCount = 0;
             }
         }
     }
@@ -262,7 +268,7 @@ public class GameGraph<T> {
             int size = nodes.getValue().size();
             totalEdges += size;
             for (GameGraphNode<T> gameGraphNode : nodes.getValue()) {
-                if ( gameGraphNode.visited)
+                if ( gameGraphNode.visitCount > 0)
                     visitedEdges++;
             }
         }
@@ -282,7 +288,7 @@ public class GameGraph<T> {
             int size = nodes.getValue().size();
             totalEdges += size;
             for (GameGraphNode<T> gameGraphNode : nodes.getValue()) {
-                if ( gameGraphNode.visited)
+                if ( gameGraphNode.visitCount > 0)
                     visitedEdges++;
             }
         }

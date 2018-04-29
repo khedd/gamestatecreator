@@ -18,7 +18,7 @@ class BinarizedGameGraphGenerator {
     private BinarizedGraphNode mGraphStartNode;
     private StateBinarization mStateBinarization;
     private final GameGraph<Long> mGameGraph = new GameGraph<>();
-
+    private Memory<Long> mMemory = null;
 
     /**
      * Initializes with given game state
@@ -74,6 +74,21 @@ class BinarizedGameGraphGenerator {
     }
 
     /**
+     * creates a memory that can record the past runs of various graph algorithms
+     */
+    void createMemory (){
+        mMemory = new Memory<>( mGameGraph.getGraph());
+    }
+
+    void activateMemory (){
+        mMemory.activate();
+    }
+
+    void deactivateMemory(){
+        mMemory.deactivate();
+    }
+
+    /**
      * calls MCTS from the graph start to the end until maxLen is reached
      * @param maxLen max len to be obtained from the MCTS, if it reaches a terminal node
      *               it ends but may get in loop so better to set this variable
@@ -109,7 +124,8 @@ class BinarizedGameGraphGenerator {
         // one node at a time
         for (int i = 0; i < maxLen; i++) {
             MCTS<Long> mcts = new MCTS<>(mGameGraph.getGraph(), currentNode);
-            mcts.setStateBinarizer( mStateBinarization);
+            mcts.setMemory( mMemory);
+
             mcts.setPolicies (scoringPolicy, randomRollout, selectionCriteria);
             currentNode = mcts.run();
             visitedNodes.add( currentNode);

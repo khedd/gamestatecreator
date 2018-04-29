@@ -9,32 +9,71 @@ import graph.ai.StateInformation;
 import java.util.*;
 
 public class MCTS<T> {
-    int mSimulationLength = 100;
-    int mRolloutLength = 5;
-    SelectionCriteria<T> mSelectionCriteria    = null;
-    RolloutPolicy<T> mRolloutPolicy        = null;
-    ScoringPolicy<T> mScoringPolicy        = null;
+    /**
+     * How many simulations will be done in one MCTS run
+     */
+    @SuppressWarnings("FieldCanBeLocal")
+    private int mSimulationLength = 100;
+    /**
+     * How deep will we go at each rollout while simulating a node
+     */
+    @SuppressWarnings("FieldCanBeLocal")
+    private int mRolloutLength = 5;
+    /**
+     * Tree policy node selection criteria
+     */
+    private SelectionCriteria<T> mSelectionCriteria    = null;
+    /**
+     * Rollout Policy, how we will choose the next node during simulation
+     */
+    private RolloutPolicy<T> mRolloutPolicy        = null;
+    /**
+     * How to score our simulation
+     */
+    private ScoringPolicy<T> mScoringPolicy        = null;
 
-    GameGraph.GameGraphNode<T> mStartNode;
+    /**
+     * The node that MCTS will run on
+     */
+    private GameGraph.GameGraphNode<T> mStartNode;
 
     /**
      * stores the parent nodes used in back propagation, updated in expansion
      */
     private final HashMap<GameGraph.GameGraphNode<T>, ArrayList<GameGraph.GameGraphNode<T>>> mParentMap = new HashMap<>();
     private final HashMap<GameGraph.GameGraphNode<T>, StateInformation> mVisible = new HashMap<>(); ///adjacency list
-    private StateBinarization mStateBinarization = null;
-    private int mTotalVisits = 0;
 
+    /**
+     * total number of visits during selection
+     */
+    private int mTotalVisits = 0;
+    /**
+     * PreLoaded graph this is uncommon in MCTS as we should not know the whole graph before
+     */
     private final HashMap<T, ArrayList<GameGraph.GameGraphNode<T>>> mGraph;
 
-    public MCTS(HashMap<T, ArrayList<GameGraph.GameGraphNode<T>>> graph, GameGraph.GameGraphNode<T> startNode){
+    /**
+     * If utilized records past MCTS runs so that we can increase coverage
+     */
+    private Memory<T> mMemory = null;
+
+
+    /**
+     * Initialize a MCTS which will work on the given Graph Structure from the given Starting Node
+     * @param graph Graph that MCTS will simulate to get the best possible action
+     * @param startNode The starting node for simulations
+     */
+    MCTS(HashMap<T, ArrayList<GameGraph.GameGraphNode<T>>> graph, GameGraph.GameGraphNode<T> startNode){
         mGraph = graph;
         mStartNode = startNode;
     }
 
-
-    public void setStateBinarizer ( StateBinarization stateBinarizer){
-        mStateBinarization = stateBinarizer;
+    /**
+     * Sets a memory that can be used in MCTS, this holds the previous visits
+     * @param memory Memory of previous runs, if null will not be utilized
+     */
+    void setMemory ( Memory<T> memory){
+        mMemory = memory;
     }
 
     /**
@@ -57,16 +96,40 @@ public class MCTS<T> {
     private GameGraph.GameGraphNode<T> getHighestChild (){
         ArrayList<GameGraph.GameGraphNode<T>> gameGraphNodes = mGraph.get(mStartNode.node);
         double maxScore = -Double.MAX_VALUE;
-        GameGraph.GameGraphNode<T> maxChild = null;
-        for (GameGraph.GameGraphNode<T> gameGraphNode: gameGraphNodes){
-            double score = mVisible.get(gameGraphNode).score;
-            if ( score > maxScore){
-                maxScore = score;
-                maxChild = gameGraphNode;
+        GameGraph.GameGraphNode<T> maxChild = useMemoryChild(mStartNode);
+        if ( maxChild == null) {
+            for (GameGraph.GameGraphNode<T> gameGraphNode : gameGraphNodes) {
+                double score = mVisible.get(gameGraphNode).score;
+                if (score > maxScore) {
+                    maxScore = score;
+                    maxChild = gameGraphNode;
+                }
             }
         }
+        updateMemory ( mStartNode, maxChild);
         return maxChild;
     }
+
+    private void updateMemory (GameGraph.GameGraphNode<T> parent, GameGraph.GameGraphNode<T> child){
+        if ( mMemory != null) {
+            mMemory.update(parent, child);
+        }
+    }
+
+    /**
+     * uses the memory if applicable and returns a child suggested from memory
+     * @param parent
+     * @return null if memory is null or not active, a child object chosen by memory
+     */
+    private GameGraph.GameGraphNode<T> useMemoryChild(GameGraph.GameGraphNode<T> parent){
+        if ( mMemory != null){
+            if ( mMemory.useMemory()){
+                return mMemory.selectChild( parent);
+            }
+        }
+        return null;
+    }
+
     /**
      * selects a node using the {@link SelectionCriteria}
      * @return node selected from the selection criteria
@@ -130,16 +193,6 @@ public class MCTS<T> {
 //            totalScore = evaluateWeights ( nodesVisited);
 //        }
         return totalScore + 1;
-    }
-
-    private double evaluateWeights(ArrayList<GameGraph.GameGraphNode<T>> nodesVisited) {
-        // TODO: 27.04.2018 need to debinarize each and grade them
-        for (GameGraph.GameGraphNode<T> node : nodesVisited) {
-            EscapeScenarioCondition esc = mStateBinarization.debinarize((Long) node.node);
-            System.out.println(node.toString());
-//            System.out.println( esc.toString());
-        }
-        return 0;
     }
 
     /**
