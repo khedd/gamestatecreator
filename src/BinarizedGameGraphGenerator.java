@@ -4,6 +4,7 @@ import graph.ai.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Generates a GraphNode from given rules {@link UserAction} and initial {@link GameState}
@@ -81,11 +82,47 @@ class BinarizedGameGraphGenerator {
     }
 
     void activateMemory (){
-        mMemory.activate();
+        if ( mMemory != null)
+            mMemory.activate();
     }
 
     void deactivateMemory(){
-        mMemory.deactivate();
+        if ( mMemory != null)
+            mMemory.deactivate();
+    }
+
+    void printUnvisitedEdgesWStates(){
+        if ( mMemory != null){
+            HashMap<Long, ArrayList<GameGraph.GameGraphNode<Long>>> map = mMemory.getUnvisited();
+            for ( Map.Entry<Long, ArrayList<GameGraph.GameGraphNode<Long>>> nodes: map.entrySet()){
+                ArrayList<String> actions = new ArrayList<>(nodes.getValue().size());
+                for (GameGraph.GameGraphNode<Long> gameGraphNode : nodes.getValue()) {
+                    actions.add( gameGraphNode.action);
+                }
+                Long binaryState = nodes.getKey();
+                EscapeScenarioCondition scenarioCondition = mStateBinarization.debinarize(binaryState);
+                System.out.print( "From State:\n" + scenarioCondition.toString());
+                System.out.println( "Actions: " + Arrays.toString(actions.toArray()) + "\n");
+            }
+        }
+    }
+
+    HashMap<String, Long> getUnvisitedHistogram (){
+        HashMap<String, Long> hashMap = new HashMap<>();
+        if ( mMemory != null){
+            HashMap<Long, ArrayList<GameGraph.GameGraphNode<Long>>> map = mMemory.getUnvisited();
+            for ( Map.Entry<Long, ArrayList<GameGraph.GameGraphNode<Long>>> nodes: map.entrySet()){
+                for (GameGraph.GameGraphNode<Long> gameGraphNode : nodes.getValue()) {
+                    Long value = 0L;
+
+                    if ( hashMap.containsKey( gameGraphNode.action)){
+                        value = hashMap.get( gameGraphNode.action);
+                    }
+                    hashMap.put( gameGraphNode.action, value + 1);
+                }
+            }
+        }
+        return hashMap;
     }
 
     /**

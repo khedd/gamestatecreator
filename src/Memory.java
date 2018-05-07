@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import static graph.GameGraph.UNVISITABLE_EDGE;
+
 /**
  * simple memory class that can be used for graph algorithms
  */
@@ -33,7 +35,11 @@ public class Memory<T> {
             for (GameGraph.GameGraphNode<T> gameGraphNode : nodes.getValue()) {
                 GameGraph.GameGraphNode<T> copyGGN = new GameGraph.GameGraphNode<>( gameGraphNode);
                 //to make sure in memory no visits are done yet
-                copyGGN.visitCount = 0;
+                if ( gameGraphNode.visitCount == UNVISITABLE_EDGE)
+                    copyGGN.visitCount = 1; //make this node visited
+                else
+                    copyGGN.visitCount = 0;
+
                 copyNodes.add( copyGGN);
             }
             mMemory.put( nodes.getKey(), copyNodes);
@@ -96,5 +102,28 @@ public class Memory<T> {
      */
     public void deactivate (){
         mIsActive = false;
+    }
+
+    /**
+     * returns the HashMap of unvisited states and its edges, can be used to understand why a
+     * persona did not visit that edge
+     * @return HashMap representing unvisited edges coming out of a state
+     */
+    public HashMap<T, ArrayList<GameGraph.GameGraphNode<T>>> getUnvisited() {
+        HashMap<T, ArrayList<GameGraph.GameGraphNode<T>>> unvisited = new HashMap<>();
+
+        for ( Map.Entry<T, ArrayList<GameGraph.GameGraphNode<T>>> nodes: mMemory.entrySet()){
+            ArrayList<GameGraph.GameGraphNode<T>> unvisitedNodes = new ArrayList<>();
+
+            for (GameGraph.GameGraphNode<T> gameGraphNode : nodes.getValue()) {
+                //copy the node just to remove the reference
+                if ( gameGraphNode.visitCount == 0){
+                    unvisitedNodes.add( new GameGraph.GameGraphNode<>(gameGraphNode));
+                }
+            }
+            if (!unvisitedNodes.isEmpty())
+                unvisited.put( nodes.getKey(), unvisitedNodes);
+        }
+        return unvisited;
     }
 }

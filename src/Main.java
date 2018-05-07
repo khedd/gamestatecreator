@@ -3,10 +3,7 @@ import graph.GameGraph;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.HashMap;
+import java.util.*;
 
 /**
  * Main entry pint of project GameStateCreator
@@ -16,7 +13,7 @@ import java.util.HashMap;
  *
  */
 class Main {
-
+    private final static String OUT_PATH = "/home/khedd/Documents/thesis/2018/weekly/w19/results/";
     /**
      * Main method calls {@link #initializeGraphActions(StateBinarization)}
      * @param args Not used
@@ -24,7 +21,7 @@ class Main {
     public static void main(String[] args){
 //        binarization ();
 
-        int[] defScore = new int[]{-1, 0, 1};
+        int[] defScore = new int[]{-1,0,1};
         boolean[] useMem = new boolean[]{false, true};
         for (Persona persona: Persona.values()){
             for (int score: defScore){
@@ -45,9 +42,9 @@ class Main {
         settings.iterationCount = 10000;
         settings.rolloutCount = 5;
         settings.maxLen = 500;
-        settings.useSaturation = false;
+        settings.useSaturation = true;
         settings.useMemory = useMem;
-        settings.path = "/home/khedd/Documents/thesis/2018/w17/results/";
+        settings.path = OUT_PATH;
         switch ( settings.persona){
             case Finisher:
                 settings.scoreTable = getScoringTableFinisher();
@@ -74,7 +71,7 @@ class Main {
             settings.maxLen = 500;
             settings.useSaturation = false;
             settings.useMemory = true;
-            settings.path = "/home/khedd/Documents/thesis/2018/w17/results/";
+            settings.path = OUT_PATH;
             switch ( settings.persona){
                 case Finisher:
                     settings.scoreTable = getScoringTableFinisher();
@@ -211,26 +208,56 @@ class Main {
         stateBinarization.addSubRooms( getSubRooms());
         stateBinarization.generate ();
 
-        System.out.println("Game State Creator");
         BinarizedGameGraphGenerator gameGraphGenerator = initializeGraphActions( stateBinarization);
         gameGraphGenerator.generate();
         gameGraphGenerator.createMemory();
 
-        BufferedWriter fileWriter = null;
+        BufferedWriter covFileWriter = null;
+        BufferedWriter actFileWriter = null;
         try {
-            fileWriter = new BufferedWriter(new FileWriter(settings.createFilename()));
-            initFileHeader ( fileWriter);
+            covFileWriter = new BufferedWriter(new FileWriter(settings.createFilename()));
+            actFileWriter = new BufferedWriter(new FileWriter(settings.createFilenameActions(false)));
+            initCovFileHeader( covFileWriter);
+            initActFileHeader ( actFileWriter);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        coverage(gameGraphGenerator, fileWriter, settings);
+        System.out.println("Testing Coverage for persona: " + settings.persona.name() + " memory: " +
+        settings.useMemory + " curiosity level: " + settings.defaultScore);
+        coverage(gameGraphGenerator, covFileWriter, settings);
 
-        if (fileWriter != null){
+        if (covFileWriter != null){
             try {
-                fileWriter.close();
+                covFileWriter.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+
+        if (actFileWriter != null){
+            try {
+                HashMap<String, Long> unvisitedHistogram = gameGraphGenerator.getUnvisitedHistogram();
+                ArrayList<String> actionHistograms = new ArrayList<>();
+                unvisitedHistogram.entrySet().stream()
+                        .sorted(Comparator.comparing(Map.Entry::getValue))
+                        .forEach(k -> actionHistograms.add(k.getKey() + "," + k.getValue()));
+                for (String element: actionHistograms){
+                    actFileWriter.write(element + "\n");
+//                    System.out.println(element.getKey() + ": " + element.getValue());
+                }
+                actFileWriter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private static void initActFileHeader(BufferedWriter writer) {
+        String line = "action,count\n";
+        try {
+            writer.write( line);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -277,7 +304,7 @@ class Main {
 
     }
 
-    private static void initFileHeader( BufferedWriter writer){
+    private static void initCovFileHeader(BufferedWriter writer){
         String line = "iteration,coveragePercent\n";
         try {
             writer.write( line);
@@ -311,6 +338,13 @@ class Main {
         String createFilename (){
             int mem = useMemory ? 1 : 0;
             return path + "persona_" + persona.name() + "_memory_" + mem + "_def_" +
+                    defaultScore + "_iter_" + iterationCount + "_len_" + maxLen +
+                    ".csv";
+        }
+        String createFilenameActions(boolean isTaken){
+            int mem = useMemory ? 1 : 0;
+            int isT = isTaken ? 1 : 0;
+            return path + "actions_"+ isT + "_persona_" + persona.name() + "_memory_" + mem + "_def_" +
                     defaultScore + "_iter_" + iterationCount + "_len_" + maxLen +
                     ".csv";
         }

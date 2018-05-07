@@ -12,7 +12,7 @@ import java.util.*;
  * @param <T>
  */
 public class GameGraph<T> {
-
+    public static int UNVISITABLE_EDGE = -1;
     /**
      * Inner class for holding the node data and the edge
      * Currently edge is hold as string, might be parametrized in the future
@@ -22,7 +22,8 @@ public class GameGraph<T> {
 
         public T node; /// vertex
         public String action; /// edge
-        public int visitCount = 0; //hope this will not overflow
+        public int visitCount = 0; //hope this will not overflow if -1 not a node able to be visited
+
 
         /**
          * initializes the node with empty parameters
@@ -167,7 +168,7 @@ public class GameGraph<T> {
      */
     public void finalize (T node){
         endNode = new GameGraphNode<>(node, "");
-
+        endNode.visitCount = UNVISITABLE_EDGE; //set visit count as negative as it cannot be visited
         ArrayList<T> endNodes = new ArrayList<>();
         for ( Map.Entry<T, ArrayList<GameGraphNode<T>>> nodes: mGraph.entrySet()){
             if ( nodes.getValue().isEmpty()){
@@ -231,7 +232,8 @@ public class GameGraph<T> {
     public void resetCoverage() {
         for ( Map.Entry<T, ArrayList<GameGraphNode<T>>> nodes: mGraph.entrySet()){
             for (GameGraphNode<T> gameGraphNode : nodes.getValue()) {
-                gameGraphNode.visitCount = 0;
+                if ( gameGraphNode.visitCount != UNVISITABLE_EDGE)
+                    gameGraphNode.visitCount = 0;
             }
         }
     }
@@ -288,7 +290,10 @@ public class GameGraph<T> {
             int size = nodes.getValue().size();
             totalEdges += size;
             for (GameGraphNode<T> gameGraphNode : nodes.getValue()) {
-                if ( gameGraphNode.visitCount > 0)
+                if ( gameGraphNode.visitCount == UNVISITABLE_EDGE){
+                    totalEdges--;
+                }
+                else if ( gameGraphNode.visitCount > 0)
                     visitedEdges++;
             }
         }
